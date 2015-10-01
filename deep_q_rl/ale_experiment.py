@@ -187,3 +187,114 @@ class ALEExperiment(object):
         else:
             raise ValueError('Unrecognized image resize method.')
 
+class ALEExperimentMulti(ALEExperiment):
+    """
+    A two-player ALE experiment.  For visualization purposes only - no learning takes place.
+    """
+    def __init__(self, ale, agent1, agent2, resized_width, resized_height,
+                 resize_method, num_epochs, epoch_length, test_length,
+                 frame_skip, death_ends_episode, max_start_nullops, rng):
+        self.ale = ale
+        self.agent1 = agent1
+        self.agent2 = agent2
+        self.num_epochs = num_epochs
+        self.epoch_length = epoch_length
+        self.test_length = test_length
+        self.frame_skip = frame_skip
+        self.death_ends_episode = death_ends_episode
+        self.min_action_set = ale.getMinimalActionSet()
+        self.resized_width = resized_width
+        self.resized_height = resized_height
+        self.resize_method = resize_method
+        self.width, self.height = ale.getScreenDims()
+
+        self.buffer_length = 2
+        self.buffer_count = 0
+        self.screen_buffer = np.empty((self.buffer_length,
+                                       self.height, self.width),
+                                      dtype=np.uint8)
+
+        self.terminal_lol = False # Most recent episode ended on a loss of life
+        self.max_start_nullops = max_start_nullops
+        self.rng = rng
+
+    def _act2(self, action1, action2):
+        """Perform the indicated actions for each player for a single frame, return no reward
+        and store the resulting screen image in the
+        buffer
+
+        """
+        self.ale.act(action1)
+        self.ale.act(action2)
+        index = self.buffer_count % self.buffer_length
+
+        self.ale.getScreenGrayscale(self.screen_buffer[index, ...])
+
+        self.buffer_count += 1
+        return 0.
+
+    def _step(self, action1, action2):
+        """ Repeat one action the appopriate number of times and return
+        no reward."""
+        for _ in range(self.frame_skip):
+            self._act2(action1, action2)
+
+        return 0.
+
+    def run_episode(self, max_steps, testing):
+        """Run a single training episode.
+
+        The boolean terminal value returned indicates whether the
+        episode ended because the game ended or the agent died (True)
+        or because the maximum number of steps was reached (False).
+        Currently this value will be ignored.
+
+        Return: (terminal, num_steps)
+
+        """
+
+        self._init_episode()
+
+        start_lives = self.ale.lives()
+
+        observation = self.get_observation()
+
+        action1 = self.agent1.start_episode(observation)
+        action2 = self.agent2.start_episode(observation)
+
+        num_steps = 0
+        while True:
+            reward = self._step(self.min_action_set[action1], self.min_action_set[action2] + 18)
+
+            self.terminal_lol = (self.death_ends_episode and not testing and
+                                 self.ale.lives() < start_lives)
+            terminal = self.ale.game_over() or self.terminal_lol
+            num_steps += 1
+
+            if terminal or num_steps >= max_steps:
+                break
+
+            observation = self.get_observation()
+
+            action1 = self.agent1.step(reward, observation)
+            action2 = self.agent2.step(reward, observation)
+
+
+        return terminal, num_steps
+
+    def run(self):
+        """
+        Run the desired number of training epochs, a testing epoch
+        is conducted after each training epoch.
+        """
+        for epoch in range(1, self.num_epochs + 1):
+            self.run_epoch(epoch, self.epoch_length)
+            self.agent1.finish_epoch(epoch)
+            self.agent2.finish_epoch(epoch)
+
+            if self.test_length > 0:
+                self.agent1.start_testing()
+                self.agent2.start_testing()
+                self.run_epoch(epoch, self.test_length, True)
+                self.agent1.finish_testing(epoch)
+                self.agent2.finish_testing(epoch)

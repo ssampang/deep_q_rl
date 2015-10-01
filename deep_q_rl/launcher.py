@@ -123,6 +123,8 @@ def process_args(args, defaults, description):
                         help=('crop|scale (default: %(default)s)'))
     parser.add_argument('--nn-file', dest="nn_file", type=str, default=None,
                         help='Pickle file containing trained net.')
+    parser.add_argument('--nn-file2', dest="nn_file2", type=str, default=None,
+                        help="Pickle file containing player 2's trained net.")
     parser.add_argument('--death-ends-episode', dest="death_ends_episode",
                         type=str, default=defaults.DEATH_ENDS_EPISODE,
                         help=('true|false (default: %(default)s)'))
@@ -225,6 +227,12 @@ def launch(args, defaults, description):
         handle = open(parameters.nn_file, 'r')
         network = cPickle.load(handle)
 
+    if parameters.nn_file2 is None:
+        network2 = None
+    else:
+        handle = open(parameters.nn_file2, 'r')
+        network2 = cPickle.load(handle)
+
     agent = ale_agent.NeuralAgent(network,
                                   parameters.epsilon_start,
                                   parameters.epsilon_min,
@@ -235,18 +243,42 @@ def launch(args, defaults, description):
                                   parameters.update_frequency,
                                   rng)
 
-    experiment = ale_experiment.ALEExperiment(ale, agent,
-                                              defaults.RESIZED_WIDTH,
-                                              defaults.RESIZED_HEIGHT,
-                                              parameters.resize_method,
-                                              parameters.epochs,
-                                              parameters.steps_per_epoch,
-                                              parameters.steps_per_test,
-                                              parameters.frame_skip,
-                                              parameters.death_ends_episode,
-                                              parameters.max_start_nullops,
-                                              rng)
-
+    # 1 player
+    if network2 is None:
+        experiment = ale_experiment.ALEExperiment(ale, agent,
+                                                  defaults.RESIZED_WIDTH,
+                                                  defaults.RESIZED_HEIGHT,
+                                                  parameters.resize_method,
+                                                  parameters.epochs,
+                                                  parameters.steps_per_epoch,
+                                                  parameters.steps_per_test,
+                                                  parameters.frame_skip,
+                                                  parameters.death_ends_episode,
+                                                  parameters.max_start_nullops,
+                                                  rng)
+    # 2 player
+    else:
+        agent2 = ale_agent.NeuralAgent(network,
+                                  parameters.epsilon_start,
+                                  parameters.epsilon_min,
+                                  parameters.epsilon_decay,
+                                  parameters.replay_memory_size,
+                                  parameters.experiment_prefix,
+                                  parameters.replay_start_size,
+                                  parameters.update_frequency,
+                                  rng)
+        experiment = ale_experiment.ALEExperimentMulti(ale,
+                                                       agent, agent2,
+                                                       defaults.RESIZED_WIDTH,
+                                                       defaults.RESIZED_HEIGHT,
+                                                       parameters.resize_method,
+                                                       parameters.epochs,
+                                                       parameters.steps_per_epoch,
+                                                       parameters.steps_per_test,
+                                                       parameters.frame_skip,
+                                                       parameters.death_ends_episode,
+                                                       parameters.max_start_nullops,
+                                                       rng)
 
     experiment.run()
 
