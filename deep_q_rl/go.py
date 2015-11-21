@@ -1,14 +1,30 @@
 #Replaces ale. Placeholder
+from .board import *
 
-def getScreenDims():
+def __init__(self, width):
+	self.board = Board(width)
+	self.dcnn = DCNN_Network()
 
 def game_over():
+	return false
 
 def reset_game() 
+	self.board = Board(width)
 
 def act(action):
-#must return an int reward
+	#must return an int reward
+	posX = action / (width*width)
+	posY = action % (width*width)
+	self.board.move(posX, posY)
+	#make DCNN move
+	self.dcnn.placeStone(self.board, posX, posY)
+	#listen to Board exceptions
+
 def getaScreenGrayscale:
-#dont think we need this 
+	#returning the array state
+	return self.board._array
+	
 def getMinimalActionSet():
-#not sure what the 'minimal' is for
+	#the universal set of moves the board can take
+	#this is currently set to 361 as there are 361 board positions the stone can be placed on
+	return range(0,361)
