@@ -11,14 +11,19 @@ def game_over():
 def reset_game() 
 	self.board = Board(width)
 
+boardErrors = 0
 def act(action):
+	global boardErrors
 	#must return an int reward
 	posX = action / (width*width)
 	posY = action % (width*width)
-	self.board.move(posX, posY)
-	#make DCNN move
-	self.dcnn.placeStone(self.board, posX, posY)
-	#listen to Board exceptions
+	try:
+		self.board.move(posX, posY)
+		#make DCNN move
+		self.dcnn.placeStone(self.board, posX, posY)
+		#listen to Board exceptions
+	except BoardError:
+		boardErrors += 1
 
 def getaScreenGrayscale:
 	#returning the array state
