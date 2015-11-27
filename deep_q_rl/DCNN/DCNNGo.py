@@ -156,7 +156,7 @@ def buildNetwork(networkPath):
             sy = filterWeights[0]['sy']
             depth = filterWeights[0]['depth']
             print depth, sx, sy, layer['stride'], layer['pad']
-            weightArray = np.zeros((noOfFilters,depth,sx,sy))
+            weightArray = np.zeros((noOfFilters,depth,sx,sy),dtype=theano.config.floatX)
             
             for index in range(0, len(filterWeights)):
                 weights = np.array(filterWeights[index]['w'])
