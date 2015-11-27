@@ -23,17 +23,17 @@ class Array(object):
 
     def _check_index(self, x, y):
         if (
-            x < 1 or
-            x > self._width or
-            y < 1 or
-            y > self._height
+            x < 0 or
+            x >= self._width or
+            y < 0 or
+            y >= self._height
         ):
             raise ArrayError('Index is not within array dimensions {w}x{h}'.format(
                 x=x, y=y, w=self._width, h=self._height
             ))
 
     def _zero_index(cls, x, y):
-        return x - 1, y - 1
+        return x , y
 
     def __getitem__(self, i):
         self._check_index(*i)

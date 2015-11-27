@@ -64,15 +64,14 @@ class Board(Array):
         """
         return self.TURNS[self._turn is self.BLACK]
 
-	def checkKo(self, x, y):
-		
-		try:
-			self.move(x,y)
-			self.undo()
-		except BoardError as e:
-			if(e.str() == 'Cannot make a move that is redundant!'):
-				return True
-		return False
+    def checkKo(self, x, y):		
+        try:
+            self.move(x,y)
+            self.undo()
+        except BoardError as e:
+            if(e == 'Cannot make a move that is redundant!'):
+                return True
+        return False
 		
     def move(self, x, y):
         """
@@ -256,6 +255,8 @@ class Board(Array):
             return traversed
 
     def get_group(self, x, y):
+        
+        
         """
         Gets the coordinates for all locations which are members of the same
         group as the location at the given coordinates.
@@ -313,6 +314,8 @@ class Board(Array):
                 return set()
 
     def get_liberties(self, x, y):
+        
+        
         """
         Gets the coordinates for liberties surrounding the group at the given
         coordinates.
@@ -320,21 +323,25 @@ class Board(Array):
         return self._get_liberties(x, y, set())
 
     def count_liberties(self, x, y):
+        
+        
         """
         Gets the number of liberties surrounding the group at the given
         coordinates.
         """
         return len(self.get_liberties(x, y))
 
-	def count_individual_liberties(self, x, y):
-		loc = self[x, y]
-		if loc is self.EMPTY:
-			return 1
-		
-		locations = [
-                (p, (a, b))
-                for p, (a, b) in self._get_surrounding(x, y)
-                if (p is loc or p is self.EMPTY)
-            ]
-		
-		return (loc, len(locations))
+    def count_individual_liberties(self, x, y):
+        
+        
+        loc = self[x, y]
+        if loc is self.EMPTY:
+            return {'loc':'empty','numLocations': [1]}
+
+        locations = [
+                    (p, (a, b))
+                    for p, (a, b) in self._get_surrounding(x, y)
+                    if (p is loc or p is self.EMPTY)
+                    ]
+        
+        return {'loc':loc, 'numLocations':len(locations)}

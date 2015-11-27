@@ -1,3 +1,6 @@
 *.pyc
 roms
-.csv
+csv
+*.swp
+dummy*
+breakout*

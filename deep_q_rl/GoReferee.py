@@ -25,7 +25,7 @@ class GoReferee():
         posX = action / (width*width)
         posY = action % (width*width)
         try:
-            self.board.move(posX+1, posY+1)
+            self.board.move(posX, posY)
         except BoardError:
             boardErrors += 1
             #returning negative reward for illegal moves

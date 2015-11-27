@@ -3,7 +3,7 @@ import lasagne
 import numpy as np
 import theano
 import os
-from GoBoard import *
+from GoBoard import BoardError
 
 class DCNNGo():
 
@@ -59,75 +59,75 @@ class DCNNGo():
             self.dcnnInput[dcnnLiberties, self.moveX + 3, self.moveY + 3] = 1
         
         #Update the liberty channels in the neighbourhood of the previous move of DCNN 
-        if(self.moveX > 0):
-            dcnnLiberties = board.count_individual_liberties(self.moveX - 1, self.moveY)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
+            if(self.moveX > 0):
+                dcnnLiberties = board.count_individual_liberties(self.moveX - 1, self.moveY)
+                if(dcnnLiberties['numLocations'] > 3):
+                    dcnnLiberties['numLocations'] = 3
+                if(dcnnLiberties['loc'] != self.boardColor):
+                    dcnnLiberties['numLocations'] += 2
+                
+                self.dcnnInput[dcnnLiberties['numLocations'], self.moveX - 1 + 3, self.moveY + 3] = 1
+            if(self.moveX < 18):
+                dcnnLiberties = board.count_individual_liberties(self.moveX + 1, self.moveY)
+                if(dcnnLiberties['numLocations'] > 3):
+                    dcnnLiberties['numLocations'] = 3
+                if(dcnnLiberties['loc'] != self.boardColor):
+                    dcnnLiberties['numLocations'] += 2
+                
+                self.dcnnInput[dcnnLiberties['numLocations'], self.moveX + 1 + 3, self.moveY + 3] = 1
+            if(self.moveY > 0):
+                dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY - 1)
+                if(dcnnLiberties['numLocations'] > 3):
+                    dcnnLiberties['numLocations'] = 3
+                if(dcnnLiberties['loc'] != self.boardColor):
+                    dcnnLiberties['numLocations'] += 2
+                
+                self.dcnnInput[dcnnLiberties['numLocations'], self.moveX + 3, self.moveY - 1 + 3] = 1
+            if(self.moveY < 18):
+                dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY + 1)
+                if(dcnnLiberties['numLocations'] > 3):
+                    dcnnLiberties['numLocations'] = 3
+                if(dcnnLiberties['loc'] != self.boardColor):
+                    dcnnLiberties['numLocations'] += 2
+                
+                self.dcnnInput[dcnnLiberties['numLocations'], self.moveX + 3, self.moveY + 1 + 3] = 1
             
-            self.dcnnInput[dcnnLiberties[1], self.moveX - 1 + 3, self.moveY + 3] = 1
-        if(self.moveX < 18):
-            dcnnLiberties = board.count_individual_liberties(self.moveX + 1, self.moveY)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
-            
-            self.dcnnInput[dcnnLiberties[1], self.moveX + 1 + 3, self.moveY + 3] = 1
-        if(self.moveY > 0):
-            dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY - 1)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
-            
-            self.dcnnInput[dcnnLiberties[1], self.moveX + 3, self.moveY - 1 + 3] = 1
-        if(self.moveY < 18):
-            dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY + 1)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
-            
-            self.dcnnInput[dcnnLiberties[1], self.moveX + 3, self.moveY + 1 + 3] = 1
-        
         #Update the liberty channels in the neighbourhood of the previous move of opponent
         if(oppenentMoveX > 0):
             dcnnLiberties = board.count_individual_liberties(oppenentMoveX - 1, oppenentMoveY)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
+            if(dcnnLiberties['numLocations'] > 3):
+                dcnnLiberties['numLocations'] = 3
+            if(dcnnLiberties['loc'] != self.boardColor):
+                dcnnLiberties['numLocations'] += 2
             
-            self.dcnnInput[dcnnLiberties[1], oppenentMoveX - 1 + 3, oppenentMoveY + 3] = 1
+            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX - 1 + 3, oppenentMoveY + 3] = 1
         if(oppenentMoveX < 18):
             dcnnLiberties = board.count_individual_liberties(oppenentMoveX + 1, oppenentMoveY)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 3
+            if(dcnnLiberties['numLocations'] > 3):
+                dcnnLiberties['numLocations'] = 3
+            if(dcnnLiberties['loc'] != self.boardColor):
+                dcnnLiberties['numLocations'] += 3
             
-            self.dcnnInput[dcnnLiberties[1], oppenentMoveX + 1 + 3, oppenentMoveY + 3] = 1
+            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX + 1 + 3, oppenentMoveY + 3] = 1
         if(oppenentMoveY > 0):
             dcnnLiberties = board.count_individual_liberties(oppenentMoveX, oppenentMoveY - 1)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 3
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
+            if(dcnnLiberties['numLocations'] > 3):
+                dcnnLiberties['numLocations'] = 3
+            if(dcnnLiberties['loc'] != self.boardColor):
+                dcnnLiberties['numLocations'] += 2
             
-            self.dcnnInput[dcnnLiberties[1], oppenentMoveX + 3, oppenentMoveY - 1 + 3] = 1
+            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX + 3, oppenentMoveY - 1 + 3] = 1
         if(oppenentMoveY < 18):
             dcnnLiberties = board.count_individual_liberties(oppenentMoveX, oppenentMoveY + 1)
-            if(dcnnLiberties[1] > 3):
-                dcnnLiberties[1] = 2
-            if(dcnnLiberties[0] != self.boardColor):
-                dcnnLiberties[1] += 2
+            if(dcnnLiberties['numLocations'] > 3):
+                dcnnLiberties['numLocations'] = 2
+            if(dcnnLiberties['loc'] != self.boardColor):
+                dcnnLiberties['numLocations'] += 2
             
-            self.dcnnInput[dcnnLiberties[1], oppenentMoveX + 3, oppenentMoveY + 1 + 3] = 1
+            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX + 3, oppenentMoveY + 1 + 3] = 1
         
         #Update the liberty channels of the move by opponent 
-        opponentLiberties = board.count_liberties(oppenentMoveX, oppenentMoveY)[1]
+        opponentLiberties = board.count_liberties(oppenentMoveX, oppenentMoveY)
         if(opponentLiberties > 3):
             opponentLiberties = 3
         self.dcnnInput[2 + opponentLiberties] = 1
