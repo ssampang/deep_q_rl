@@ -28,6 +28,7 @@ class GoReferee():
             self.board.move(posX, posY)
         except BoardError:
             boardErrors += 1
+            print 'BoardErrors: '+str(boardErrors)
             #returning negative reward for illegal moves
             return -1
 

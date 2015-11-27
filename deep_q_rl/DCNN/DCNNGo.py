@@ -28,9 +28,9 @@ class DCNNGo():
         self.moveY = -1
         self.boardColor = boardColor
 
-    def placeStone(self, board, oppenentMoveX, oppenentMoveY):
+    def placeStone(self, board, opponentMoveX, opponentMoveY):
         
-        self._buildLiberties(board, oppenentMoveX, oppenentMoveY)
+        self._buildLiberties(board, opponentMoveX, opponentMoveY)
         
         # Setting ko channel
         # Naive method. Going over all positions and checking
@@ -50,7 +50,7 @@ class DCNNGo():
             except BoardError:
                 continue
     
-    def _buildLiberties(self, board, oppenentMoveX, oppenentMoveY):
+    def _buildLiberties(self, board, opponentMoveX, opponentMoveY):
         #Update the liberty channels at the previous move of DCNN 
         if(self.moveX != -1 and self.moveY != -1):
             dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY)['numLocations']
@@ -93,41 +93,41 @@ class DCNNGo():
                 self.dcnnInput[dcnnLiberties['numLocations'], self.moveX + 3, self.moveY + 1 + 3] = 1
             
         #Update the liberty channels in the neighbourhood of the previous move of opponent
-        if(oppenentMoveX > 0):
-            dcnnLiberties = board.count_individual_liberties(oppenentMoveX - 1, oppenentMoveY)
+        if(opponentMoveX > 0):
+            dcnnLiberties = board.count_individual_liberties(opponentMoveX - 1, opponentMoveY)
             if(dcnnLiberties['numLocations'] > 3):
                 dcnnLiberties['numLocations'] = 3
             if(dcnnLiberties['loc'] != self.boardColor):
                 dcnnLiberties['numLocations'] += 2
             
-            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX - 1 + 3, oppenentMoveY + 3] = 1
-        if(oppenentMoveX < 18):
-            dcnnLiberties = board.count_individual_liberties(oppenentMoveX + 1, oppenentMoveY)
+            self.dcnnInput[dcnnLiberties['numLocations'], opponentMoveX - 1 + 3, opponentMoveY + 3] = 1
+        if(opponentMoveX < 18):
+            dcnnLiberties = board.count_individual_liberties(opponentMoveX + 1, opponentMoveY)
             if(dcnnLiberties['numLocations'] > 3):
                 dcnnLiberties['numLocations'] = 3
             if(dcnnLiberties['loc'] != self.boardColor):
                 dcnnLiberties['numLocations'] += 3
             
-            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX + 1 + 3, oppenentMoveY + 3] = 1
-        if(oppenentMoveY > 0):
-            dcnnLiberties = board.count_individual_liberties(oppenentMoveX, oppenentMoveY - 1)
+            self.dcnnInput[dcnnLiberties['numLocations'], opponentMoveX + 1 + 3, opponentMoveY + 3] = 1
+        if(opponentMoveY > 0):
+            dcnnLiberties = board.count_individual_liberties(opponentMoveX, opponentMoveY - 1)
             if(dcnnLiberties['numLocations'] > 3):
                 dcnnLiberties['numLocations'] = 3
             if(dcnnLiberties['loc'] != self.boardColor):
                 dcnnLiberties['numLocations'] += 2
             
-            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX + 3, oppenentMoveY - 1 + 3] = 1
-        if(oppenentMoveY < 18):
-            dcnnLiberties = board.count_individual_liberties(oppenentMoveX, oppenentMoveY + 1)
+            self.dcnnInput[dcnnLiberties['numLocations'], opponentMoveX + 3, opponentMoveY - 1 + 3] = 1
+        if(opponentMoveY < 18):
+            dcnnLiberties = board.count_individual_liberties(opponentMoveX, opponentMoveY + 1)
             if(dcnnLiberties['numLocations'] > 3):
                 dcnnLiberties['numLocations'] = 2
             if(dcnnLiberties['loc'] != self.boardColor):
                 dcnnLiberties['numLocations'] += 2
             
-            self.dcnnInput[dcnnLiberties['numLocations'], oppenentMoveX + 3, oppenentMoveY + 1 + 3] = 1
+            self.dcnnInput[dcnnLiberties['numLocations'], opponentMoveX + 3, opponentMoveY + 1 + 3] = 1
         
         #Update the liberty channels of the move by opponent 
-        opponentLiberties = board.count_liberties(oppenentMoveX, oppenentMoveY)
+        opponentLiberties = board.count_liberties(opponentMoveX, opponentMoveY)
         if(opponentLiberties > 3):
             opponentLiberties = 3
         self.dcnnInput[2 + opponentLiberties] = 1

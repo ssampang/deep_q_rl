@@ -103,7 +103,8 @@ class GoExperiment(object):
 
         """
         reward = self.go.act(action)
-
+        print reward
+        
 				#not sure if we need this index getScreenGrayscale stuff....
         index = self.buffer_count % self.buffer_length
 
