@@ -3,7 +3,7 @@ import lasagne
 import numpy as np
 import theano
 import os
-from GoBoard import BoardError
+from GoBoard import *
 
 class DCNNGo():
 

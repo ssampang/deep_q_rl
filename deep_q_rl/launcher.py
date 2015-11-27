@@ -221,7 +221,7 @@ def launch(args, defaults, description):
                                   parameters.update_frequency,
                                   rng)
 
-    experiment = GoExperiment.GoExperiment(GoReferee, agent,
+    experiment = GoExperiment(goReferee, agent,
                                               defaults.RESIZED_WIDTH,
                                               defaults.RESIZED_HEIGHT,
                                               parameters.resize_method,

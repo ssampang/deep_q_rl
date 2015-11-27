@@ -25,7 +25,7 @@ class GoReferee():
         posX = action / (width*width)
         posY = action % (width*width)
         try:
-            self.board.move(posX, posY)
+            self.board.move(posX+1, posY+1)
         except BoardError:
             boardErrors += 1
             #returning negative reward for illegal moves
@@ -46,3 +46,6 @@ class GoReferee():
         #the universal set of moves the board can take
         #this is currently set to 361 as there are 361 board positions the stone can be placed on
         return range(0,361)
+    
+    def getScreenDims(self):
+        return width,width 
