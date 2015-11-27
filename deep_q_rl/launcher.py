@@ -7,12 +7,12 @@ run_nips.py or run_nature.py.
 import os
 import argparse
 import logging
-import ale_python_interface
+from GoReferee import GoReferee
 import cPickle
 import numpy as np
 import theano
 
-import ale_experiment
+from GoExperiment import GoExperiment
 import ale_agent
 import q_network
 
@@ -186,23 +186,9 @@ def launch(args, defaults, description):
     if parameters.cudnn_deterministic:
         theano.config.dnn.conv.algo_bwd = 'deterministic'
 
-    ale = ale_python_interface.ALEInterface()
-    ale.setInt('random_seed', rng.randint(1000))
+    goReferee = GoReferee(19)
 
-    if parameters.display_screen:
-        import sys
-        if sys.platform == 'darwin':
-            import pygame
-            pygame.init()
-            ale.setBool('sound', False) # Sound doesn't work on OSX
-
-    ale.setBool('display_screen', parameters.display_screen)
-    ale.setFloat('repeat_action_probability',
-                 parameters.repeat_action_probability)
-
-    ale.loadROM(full_rom_path)
-
-    num_actions = len(ale.getMinimalActionSet())
+    num_actions = len(goReferee.getMinimalActionSet())
 
     if parameters.nn_file is None:
         network = q_network.DeepQLearner(defaults.RESIZED_WIDTH,
@@ -235,7 +221,7 @@ def launch(args, defaults, description):
                                   parameters.update_frequency,
                                   rng)
 
-    experiment = ale_experiment.ALEExperiment(ale, agent,
+    experiment = GoExperiment.GoExperiment(GoReferee, agent,
                                               defaults.RESIZED_WIDTH,
                                               defaults.RESIZED_HEIGHT,
                                               parameters.resize_method,

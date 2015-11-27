@@ -64,6 +64,16 @@ class Board(Array):
         """
         return self.TURNS[self._turn is self.BLACK]
 
+	def checkKo(self, x, y):
+		
+		try:
+			self.move(x,y)
+			self.undo()
+		except BoardError as e:
+			if(e.str() == 'Cannot make a move that is redundant!'):
+				return True
+		return False
+		
     def move(self, x, y):
         """
         Makes a move at the given location for the current turn's color.
@@ -315,3 +325,16 @@ class Board(Array):
         coordinates.
         """
         return len(self.get_liberties(x, y))
+
+	def count_individual_liberties(self, x, y):
+		loc = self[x, y]
+		if loc is self.EMPTY:
+			return 1
+		
+		locations = [
+                (p, (a, b))
+                for p, (a, b) in self._get_surrounding(x, y)
+                if (p is loc or p is self.EMPTY)
+            ]
+		
+		return (loc, len(locations))

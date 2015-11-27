@@ -6,7 +6,6 @@ Author: Nathan Sprague
 """
 import logging
 import numpy as np
-import cv2
 
 # Number of rows to crop off the bottom of the (downsampled) screen.
 # This is appropriate for breakout, but it may need to be modified
@@ -31,7 +30,7 @@ class GoExperiment(object):
         self.resize_method = resize_method
         self.width, self.height = go.getScreenDims()
 
-        self.buffer_length = 2
+        self.buffer_length = 1
         self.buffer_count = 0
         self.screen_buffer = np.empty((self.buffer_length,
                                        self.height, self.width),
@@ -156,6 +155,7 @@ class GoExperiment(object):
 
 
     def get_observation(self):
+        return self.screen_buffer[0];
         """ Resize and merge the previous two screen images """
 
         assert self.buffer_count >= 2
@@ -165,27 +165,28 @@ class GoExperiment(object):
         return self.resize_image(max_image)
 
     def resize_image(self, image):
-        """ Appropriately resize a single image """
-
-        if self.resize_method == 'crop':
-            # resize keeping aspect ratio
-            resize_height = int(round(
-                float(self.height) * self.resized_width / self.width))
-
-            resized = cv2.resize(image,
-                                 (self.resized_width, resize_height),
-                                 interpolation=cv2.INTER_LINEAR)
-
-            # Crop the part we want
-            crop_y_cutoff = resize_height - CROP_OFFSET - self.resized_height
-            cropped = resized[crop_y_cutoff:
-                              crop_y_cutoff + self.resized_height, :]
-
-            return cropped
-        elif self.resize_method == 'scale':
-            return cv2.resize(image,
-                              (self.resized_width, self.resized_height),
-                              interpolation=cv2.INTER_LINEAR)
-        else:
-            raise ValueError('Unrecognized image resize method.')
+        return image
+        # """ Appropriately resize a single image """
+        #
+        # if self.resize_method == 'crop':
+        #     # resize keeping aspect ratio
+        #     resize_height = int(round(
+        #         float(self.height) * self.resized_width / self.width))
+        #
+        #     resized = cv2.resize(image,
+        #                          (self.resized_width, resize_height),
+        #                          interpolation=cv2.INTER_LINEAR)
+        #
+        #     # Crop the part we want
+        #     crop_y_cutoff = resize_height - CROP_OFFSET - self.resized_height
+        #     cropped = resized[crop_y_cutoff:
+        #                       crop_y_cutoff + self.resized_height, :]
+        #
+        #     return cropped
+        # elif self.resize_method == 'scale':
+        #     return cv2.resize(image,
+        #                       (self.resized_width, self.resized_height),
+        #                       interpolation=cv2.INTER_LINEAR)
+        # else:
+        #     raise ValueError('Unrecognized image resize method.')
 
