@@ -9,7 +9,7 @@ boardErrors = 0
 class GoReferee():
     def __init__(self, width):
         self.board = Board(width)
-        self.dcnn = DCNNGo('')
+        self.dcnn = DCNNGo(Location('white'))
 
     def game_over(self):
         return False
