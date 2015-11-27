@@ -28,6 +28,7 @@ class Array(object):
             y < 0 or
             y >= self._height
         ):
+            #print str(x)+' '+str(y)
             raise ArrayError('Index is not within array dimensions {w}x{h}'.format(
                 x=x, y=y, w=self._width, h=self._height
             ))

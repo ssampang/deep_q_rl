@@ -9,7 +9,7 @@ class DCNNGo():
 
     def __init__(self, boardColor):
         self.prediction_function = buildNetwork(os.path.join(os.path.dirname(__file__), "allenNetwork.json"))
-        self.dcnnInput = np.zeros((8, 25, 25))
+        self.dcnnInput = np.zeros((8, 25, 25), dtype=theano.config.floatX)
         for x in range(0,3):
             self.dcnnInput[7,x,:] = 1
             self.dcnnInput[7,:,x] = 1
@@ -53,7 +53,7 @@ class DCNNGo():
     def _buildLiberties(self, board, oppenentMoveX, oppenentMoveY):
         #Update the liberty channels at the previous move of DCNN 
         if(self.moveX != -1 and self.moveY != -1):
-            dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY)[1]
+            dcnnLiberties = board.count_individual_liberties(self.moveX, self.moveY)['numLocations']
             if(dcnnLiberties > 3):
                 dcnnLiberties = 3
             self.dcnnInput[dcnnLiberties, self.moveX + 3, self.moveY + 3] = 1
@@ -174,9 +174,9 @@ def buildNetwork(networkPath):
         if(layer['layer_type'] == 'fc'):
             num_units  = len(layer['filters'])
             num_inputs = layer['num_inputs']
-            weights = np.zeros((num_units, num_inputs))
+            weights = np.zeros((num_units, num_inputs), dtype=theano.config.floatX)
             for i in range(0, num_units):
-                weights[i] = np.array(layer['filters'][i]['w'])
+                weights[i] = np.array(layer['filters'][i]['w'], dtype=theano.config.floatX)
             weights = np.transpose(weights)
             biases = np.array(layer['biases']['w'])
             fcLayer = lasagne.layers.DenseLayer(incoming = convolutionLayers[-1], num_units = num_units, W = weights, b = biases, nonlinearity=lasagne.nonlinearities.softmax)
