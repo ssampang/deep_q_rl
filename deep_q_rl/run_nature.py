@@ -62,4 +62,7 @@ class Defaults:
     CUDNN_DETERMINISTIC = False
 
 if __name__ == "__main__":
-    launcher.launch(sys.argv[1:], Defaults, __doc__)
+    args = ['--rom','dummy']
+    #launcher.launch(sys.argv[1:], Defaults, __doc__)
+    launcher.launch(args, Defaults, __doc__)
+    
