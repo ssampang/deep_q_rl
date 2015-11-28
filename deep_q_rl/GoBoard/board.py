@@ -323,8 +323,6 @@ class Board(Array):
         return self._get_liberties(x, y, set())
 
     def count_liberties(self, x, y):
-        
-        
         """
         Gets the number of liberties surrounding the group at the given
         coordinates.
@@ -332,16 +330,8 @@ class Board(Array):
         return len(self.get_liberties(x, y))
 
     def count_individual_liberties(self, x, y):
-        
-        
-        loc = self[x, y]
-        if loc is self.EMPTY:
-            return {'loc':'empty','numLocations': [1]}
-
-        locations = [
-                    (p, (a, b))
-                    for p, (a, b) in self._get_surrounding(x, y)
-                    if (p is loc or p is self.EMPTY)
-                    ]
-        
-        return {'loc':loc, 'numLocations':len(locations)}
+        """
+        Gets the number of liberties surrounding the group at the given
+        coordinates.
+        """
+        return {'loc':self[x,y],'numLocations': 1}
