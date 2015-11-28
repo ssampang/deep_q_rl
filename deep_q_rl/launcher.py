@@ -159,7 +159,10 @@ def process_args(args, defaults, description):
         # of action choices.
         parameters.freeze_interval = (parameters.freeze_interval //
                                       parameters.update_frequency)
-
+                                      
+    parameters.frame_skip = 1
+    parameters.death_ends_episode = False
+    
     return parameters
 
 
