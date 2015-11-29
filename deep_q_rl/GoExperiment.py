@@ -32,9 +32,9 @@ class GoExperiment(object):
 
         self.buffer_length = 1
         self.buffer_count = 0
-        self.screen_buffer = np.empty((self.buffer_length,
+        self.screen_buffer = np.ones((self.buffer_length,
                                        self.height, self.width),
-                                      dtype=np.uint8)
+                                      dtype=np.uint8) * 127
 
         self.terminal_lol = False # Most recent episode ended on a loss of life
         self.max_start_nullops = max_start_nullops
@@ -82,18 +82,23 @@ class GoExperiment(object):
         performs a randomly determined number of null action to randomize
         the initial game state."""
 
-        if not self.terminal_lol or self.go.game_over():
+#        if not self.terminal_lol or self.go.game_over():
+        if self.go.game_over():
+            self.screen_buffer = np.ones((self.buffer_length,
+                                       self.height, self.width),
+                                      dtype=np.uint8) * 127
             self.go.reset_game()
 
-            if self.max_start_nullops > 0:
-                random_actions = self.rng.randint(0, self.max_start_nullops+1)
-                for _ in range(random_actions):
-                    self._act(0) # Null action
+#            if self.max_start_nullops > 0:
+#                # Assuming the learner is white we play a random move on the board. 
+#                random_actions = self.rng.randint(0, self.max_start_nullops+1)
+#                for _ in range(random_actions):
+#                    self._act(0) # Null action
 
         # Make sure the screen buffer is filled at the beginning of
         # each episode...
-        self._act(0)
-        self._act(0)
+#        self._act(0)
+#        self._act(0)
 
 
     def _act(self, action):
@@ -143,14 +148,16 @@ class GoExperiment(object):
         num_steps = 0
         while True:
             reward = self._step(self.min_action_set[action])
-            self.terminal_lol = (self.death_ends_episode and not testing)
-            terminal = self.go.game_over() or self.terminal_lol
+#            self.terminal_lol = (self.death_ends_episode and not testing)
+            
+#            terminal = self.go.game_over() or self.terminal_lol
+            terminal = self.go.game_over() 
+            
             num_steps += 1
 
             if terminal or num_steps >= max_steps:
                 self.agent.end_episode(reward, terminal)
                 break
-
             action = self.agent.step(reward, self.get_observation())
         return terminal, num_steps
 
@@ -159,11 +166,11 @@ class GoExperiment(object):
         return self.screen_buffer[0];
         """ Resize and merge the previous two screen images """
 
-        assert self.buffer_count >= 2
-        index = self.buffer_count % self.buffer_length - 1
-        max_image = np.maximum(self.screen_buffer[index, ...],
-                               self.screen_buffer[index - 1, ...])
-        return self.resize_image(max_image)
+#        assert self.buffer_count >= 2
+#        index = self.buffer_count % self.buffer_length - 1
+#        max_image = np.maximum(self.screen_buffer[index, ...],
+#                               self.screen_buffer[index - 1, ...])
+#        return self.resize_image(max_image)
 
     def resize_image(self, image):
         return image

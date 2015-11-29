@@ -37,7 +37,7 @@ class DCNNGo():
         for x in range(0,19):
             for y in range(0,19):
                 if(board.checkKo(x,y) == True):
-                    self.dcnnInput[6,x+3,y+3] = 1
+                    self.dcnnInput[6,y+3,x+3] = 1
         
         inputToDCNN = self.dcnnInput.reshape(1,8,25,25)
         predProbs = self.prediction_function(inputToDCNN)
@@ -47,6 +47,9 @@ class DCNNGo():
             self.moveY = pos % 19
             try:
                 board.move(self.moveX, self.moveY)
+                print((self.moveX, self.moveY))
+                
+                break
             except BoardError:
                 continue
     
@@ -57,9 +60,9 @@ class DCNNGo():
                 if(dcnnLiberties['numLocations'] > 3):
                     dcnnLiberties['numLocations'] = 3
                 if(dcnnLiberties['loc'] == self.boardColor):
-                    self.dcnnInput[dcnnLiberties['numLocations'], self.moveX + 3, self.moveY + 3] = 1
+                    self.dcnnInput[dcnnLiberties['numLocations'], j + 3, i + 3] = 1
                 else:
-                    self.dcnnInput[dcnnLiberties['numLocations'] + 2, self.moveX + 3, self.moveY + 3] = 1
+                    self.dcnnInput[dcnnLiberties['numLocations'] + 2, j + 3, i + 3] = 1
 
 def buildNetwork(networkPath):
     dataT = open(networkPath)

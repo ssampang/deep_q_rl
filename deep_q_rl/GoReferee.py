@@ -1,20 +1,28 @@
 #Replaces ale. Placeholder
-from GoBoard import Board, BoardError, Location
+from GoBoard import Board, BoardError, Location, View
 from DCNN.DCNNGo import DCNNGo
 
+import sys
 import numpy as np
 
 width = 19
 boardErrors = 0
 class GoReferee():
+    
     def __init__(self, width):
         self.board = Board(width)
         self.dcnn = DCNNGo(Location('white'))
+        self.move_counter = 0
+        self.view_ = View(self.board)
 
     def game_over(self):
-        return False
+        if self.move_counter > 200:
+            return True
+        else:
+            return False
 
     def reset_game(self):
+        self.move_counter = 0
         self.board = Board(width)
 
 
@@ -34,7 +42,14 @@ class GoReferee():
 
         #make DCNN move
         self.dcnn.placeStone(self.board, posX, posY)
-
+        self.move_counter += 1
+        
+        self.view_.redraw()
+        
+        sys.stdout.write('{0}\n'.format(self.view_))
+        sys.stdout.write('Black: {black} <===> White: {white}\n'.format(**self.board.score))
+        sys.stdout.write('{0}\'s move... '.format(self.board.turn))
+        
         #First player in GoBoard is black, return black's score as reward
         return self.board.score['black']
 
@@ -43,11 +58,11 @@ class GoReferee():
         for i in range(0,19):
             for j in range(0,19):
                 if(self.board._array[i][j] == Location('black')):
-                    npImageBuffer[i][j] = 1
-                elif(self.board._array[i][j] == Location('white')):
                     npImageBuffer[i][j] = 0
+                elif(self.board._array[i][j] == Location('white')):
+                    npImageBuffer[i][j] = 255
                 else:
-                    npImageBuffer[i][j] = -1
+                    npImageBuffer[i][j] = 127
         return npImageBuffer
 
     def getMinimalActionSet(self):
