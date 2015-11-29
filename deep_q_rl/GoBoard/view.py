@@ -15,7 +15,7 @@ class View(Array):
 
     def __init__(self, board):
         self._board = board
-        self._cursor = (1, 1)
+        self._cursor = (0, 0)
 
         self._hoshis = self._get_hoshis(board._width)
 
@@ -72,10 +72,10 @@ class View(Array):
         return hoshis
 
     def _in_width(self, v):
-        return max(1, min(self._width, v))
+        return max(0, min(self._width - 1, v))
 
     def _in_height(self, v):
-        return max(1, min(self._height, v))
+        return max(0, min(self._height - 1, v))
 
     def cursor_up(self):
         self._cursor = (

@@ -334,4 +334,7 @@ class Board(Array):
         Gets the number of liberties surrounding the group at the given
         coordinates.
         """
-        return {'loc':self[x,y],'numLocations': 1}
+        loc = self[x, y]
+        if loc is self.EMPTY:
+            return {'loc':self[x,y],'numLocations': 0}
+        return {'loc':self[x,y],'numLocations': self.count_liberties(x,y)}

@@ -9,6 +9,7 @@ class DCNNGo():
 
     def __init__(self, boardColor):
         self.prediction_function = buildNetwork(os.path.join(os.path.dirname(__file__), "allenNetwork.json"))
+
         self.dcnnInput = np.zeros((8, 25, 25), dtype=theano.config.floatX)
         for x in range(0,3):
             self.dcnnInput[7,x,:] = 1
@@ -43,8 +44,8 @@ class DCNNGo():
         predProbs = self.prediction_function(inputToDCNN)
         sortedPos = np.argsort(predProbs[0])
         for pos in sortedPos:
-            self.moveX = pos / 19
-            self.moveY = pos % 19
+            self.moveX = pos % 19
+            self.moveY = pos / 19
             try:
                 board.move(self.moveX, self.moveY)
                 print((self.moveX, self.moveY))
@@ -59,10 +60,14 @@ class DCNNGo():
                 dcnnLiberties = board.count_individual_liberties(i, j)
                 if(dcnnLiberties['numLocations'] > 3):
                     dcnnLiberties['numLocations'] = 3
+                if(dcnnLiberties['numLocations'] == 0):
+                    continue
                 if(dcnnLiberties['loc'] == self.boardColor):
-                    self.dcnnInput[dcnnLiberties['numLocations'], j + 3, i + 3] = 1
+                    self.dcnnInput[dcnnLiberties['numLocations'] - 1, j + 3, i + 3] = 1
+                    print dcnnLiberties['loc'], dcnnLiberties['numLocations'] - 1, i, j
                 else:
-                    self.dcnnInput[dcnnLiberties['numLocations'] + 2, j + 3, i + 3] = 1
+                    self.dcnnInput[dcnnLiberties['numLocations'] - 1 + 3, j + 3, i + 3] = 1
+                    print dcnnLiberties['loc'], dcnnLiberties['numLocations'] - 1, i, j
 
 def buildNetwork(networkPath):
     dataT = open(networkPath)
@@ -87,17 +92,21 @@ def buildNetwork(networkPath):
             sx = filterWeights[0]['sx']
             sy = filterWeights[0]['sy']
             depth = filterWeights[0]['depth']
-            print depth, sx, sy, layer['stride'], layer['pad']
+            print noOfFilters, depth, sx, sy, layer['stride'], layer['pad']
             weightArray = np.zeros((noOfFilters,depth,sx,sy),dtype=theano.config.floatX)
             
             for index in range(0, len(filterWeights)):
-                weights = np.array(filterWeights[index]['w'])
-                weights = weights.reshape((depth,sx,sy))
+                weights1D = np.array(filterWeights[index]['w'])
+                weights = np.zeros((depth,sy,sx))
+                for channel in range(0,depth):
+                    for y in range(0,sy):
+                        for x in range(0,sx):
+                            weights[channel,y,x] = weights1D[(sx*y+x)*depth+channel]
                 weightArray[index] = weights
             
             biases = np.array(layer['biases']['w'])
             
-            convLayer = lasagne.layers.Conv2DLayer(incoming = convolutionLayers[-1], num_filters = noOfFilters, filter_size = (sx,sy), stride = layer['stride'], pad = layer['pad'], W = weightArray, b = biases, nonlinearity = lasagne.nonlinearities.rectify)
+            convLayer = lasagne.layers.Conv2DLayer(incoming = convolutionLayers[-1], num_filters = noOfFilters, filter_size = (sy,sx), stride = layer['stride'], pad = layer['pad'], W = weightArray, b = biases, nonlinearity = lasagne.nonlinearities.rectify)
             convolutionLayers.append(convLayer)
             layerWeightMatrices.append(weightArray)
     
@@ -111,6 +120,7 @@ def buildNetwork(networkPath):
                 weights[i] = np.array(layer['filters'][i]['w'], dtype=theano.config.floatX)
             weights = np.transpose(weights)
             biases = np.array(layer['biases']['w'])
+            print np.shape(weights),np.shape(biases),num_units,num_inputs
             fcLayer = lasagne.layers.DenseLayer(incoming = convolutionLayers[-1], num_units = num_units, W = weights, b = biases, nonlinearity=lasagne.nonlinearities.softmax)
     
     prediction_ = lasagne.layers.get_output(fcLayer, deterministic=True)
