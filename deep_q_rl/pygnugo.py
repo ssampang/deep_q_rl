@@ -29,14 +29,14 @@ class gnugo():
         self.move_counter = 0
     
     def game_over(self):
-        if self.move_counter == 0:
+        if self.move_counter % 200 == 0:
             return True
         else:
             return False
         
     def reset_game(self):
         self.move_counter = 0
-        self.board = Board(width)
+        self.board = Board(self.board_size)
         self.close_gnugo()
     
     def getMinimalActionSet(self):
@@ -88,7 +88,9 @@ class gnugo():
         place_stone = self.map_to_board(b_x,b_y)
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'play black ' + place_stone + '\n')
         self.gnugo_ctr +=1
-        return self.get_gnugo_out()
+        # Flush the output 
+        temp = self.get_gnugo_out()
+        return self.move_black
     
     def map_to_board(self,x,y):
         alpha_numa_dict = {'A' : 0,
@@ -164,7 +166,9 @@ class gnugo():
         self.move_counter +=1
         
         if self.verbose:
-            print move_b,move_w
+            print 'Move Number: %d'%self.move_counter
+            print 'Black plays: (%d,%d), White plays: (%d,%d)'%(move_b[0],move_b[1],move_w[0],move_w[1])
+            print 'Black Score = %d, White Score = %d'%(int(self.score_black),int(self.score_white))
             print self.show_board()
         
     def act(self, action):
