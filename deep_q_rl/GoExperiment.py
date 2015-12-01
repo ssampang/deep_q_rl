@@ -11,6 +11,7 @@ import numpy as np
 # This is appropriate for breakout, but it may need to be modified
 # for other games.
 CROP_OFFSET = 8
+import theano 
 
 
 class GoExperiment(object):
@@ -24,14 +25,17 @@ class GoExperiment(object):
         self.test_length = test_length
         self.frame_skip = frame_skip
         self.death_ends_episode = death_ends_episode
-        self.min_action_set = go.getMinimalActionSet()
+        self.min_action_set = self.go.getMinimalActionSet()
         self.resized_width = resized_width
         self.resized_height = resized_height
         self.resize_method = resize_method
-        self.width, self.height = go.getScreenDims()
+        self.width, self.height = self.go.board_size,self.go.board_size
 
         self.buffer_length = 1
         self.buffer_count = 0
+        
+        self.board_state = np.zeros((3,19,19),dtype =theano.config.floatX)
+        
         self.screen_buffer = np.ones((self.buffer_length,
                                        self.height, self.width),
                                       dtype=np.uint8) * 127
@@ -84,10 +88,12 @@ class GoExperiment(object):
 
 #        if not self.terminal_lol or self.go.game_over():
         if self.go.game_over():
+            self.go.start_gnugo()
+            # I dont see why we require this variable
             self.screen_buffer = np.ones((self.buffer_length,
                                        self.height, self.width),
                                       dtype=np.uint8) * 127
-            self.go.reset_game()
+#            self.go.reset_game()
 
 #            if self.max_start_nullops > 0:
 #                # Assuming the learner is white we play a random move on the board. 
@@ -100,20 +106,21 @@ class GoExperiment(object):
 #        self._act(0)
 #        self._act(0)
 
-
     def _act(self, action):
         """Perform the indicated action for a single frame, return the
         resulting reward and store the resulting screen image in the
         buffer
 
         """
+        
         reward = self.go.act(action)
+        
         print reward
         
-				#not sure if we need this index getScreenGrayscale stuff....
+	   #not sure if we need this index getScreenGrayscale stuff....
         index = self.buffer_count % self.buffer_length
 
-        self.go.getScreenGrayscale(self.screen_buffer[index, ...])
+#        self.go.getScreenGrayscale(self.screen_buffer[index, ...])
 
         self.buffer_count += 1
         return reward
@@ -122,8 +129,8 @@ class GoExperiment(object):
         """ Repeat one action the appopriate number of times and return
         the summed reward. """
         reward = 0
-        for _ in range(self.frame_skip):
-            reward += self._act(action)
+#        for _ in range(self.frame_skip):
+        reward += self._act(action)
 
         return reward
 
@@ -140,14 +147,12 @@ class GoExperiment(object):
         """
 
         self._init_episode()
-
-				#definitely doesnt make sense
-        #start_lives = self.ale.lives()
-
+        
+        # Get the first move, currently this is a random move
         action = self.agent.start_episode(self.get_observation())
         num_steps = 0
         while True:
-            reward = self._step(self.min_action_set[action])
+            reward = self._step(action)
 #            self.terminal_lol = (self.death_ends_episode and not testing)
             
 #            terminal = self.go.game_over() or self.terminal_lol
@@ -157,6 +162,7 @@ class GoExperiment(object):
 
             if terminal or num_steps >= max_steps:
                 self.agent.end_episode(reward, terminal)
+                self.go.reset_game()
                 break
             action = self.agent.step(reward, self.get_observation())
         return terminal, num_steps

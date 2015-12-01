@@ -5,6 +5,7 @@ Created on Sun Nov 29 23:22:27 2015
 @author: adityanagarajan
 """
 
+from GoBoard import Board, BoardError, Location, View
 
 import subprocess 
 import re
@@ -12,16 +13,36 @@ import numpy as np
 import theano
 
 class gnugo():
-    def __init__(self,board_size = 19):
+    def __init__(self,board_size = 19,verbose = False):
         self.proc = None
         self.color = 'black'
         self.gnugo_ctr = 1
         self.board_size = board_size
+        self.board = Board(self.board_size)
         self.move_white = None
         self.move_black = None
         self.score_white = 0
         self.score_black = 0
-        self.board_state = np.zeros((3,self.board_size,self.board_size),dtype=theano.config.floatX)  
+        self.verbose = verbose
+        self.board_state = np.zeros((3,self.board_size,self.board_size),dtype=theano.config.floatX)
+        self.boardErrors = 0
+        self.move_counter = 0
+    
+    def game_over(self):
+        if self.move_counter == 0:
+            return True
+        else:
+            return False
+        
+    def reset_game(self):
+        self.move_counter = 0
+        self.board = Board(width)
+        self.close_gnugo()
+    
+    def getMinimalActionSet(self):
+        #the universal set of moves the board can take
+        #this is currently set to 361 as there are 361 board positions the stone can be placed on
+        return range(0,self.board_size * self.board_size)
     
     def start_gnugo(self):
         self.proc = subprocess.Popen(['gnugo', '--mode', 'gtp'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -40,19 +61,22 @@ class gnugo():
     def get_score(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'captures white'+ '\n')
         self.gnugo_ctr +=1
-        self.score_white = self.get_gnugo_out()
-        self.proc.stdin.stdout.write(str(self.gnugo_ctr) + ' ' + 'captures black'+ '\n')
+        self.score_white = re.findall('\d+',self.get_gnugo_out())[1]
+        self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'captures black'+ '\n')
         self.gnugo_ctr +=1
-        self.score_black = self.get_gnugo_out()
+        self.score_black = re.findall('\d+',self.get_gnugo_out())[1]
         
     def get_move_white(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'genmove white'+ '\n')
         self.gnugo_ctr +=1      
         self.white_move = self.get_gnugo_out()
         self.white_move = self.white_move.strip().split()[1]
+        print 'Whites move is ' + self.white_move
+        
         alpha,numa = (re.findall('[a-z|A-Z]',self.white_move)[0],re.findall('\d+',self.white_move)[0])
         
         self.white_move = self.map_from_board(alpha,numa)
+        print self.white_move
         
         self.board_state[2,self.white_move[0],self.white_move[1]] = 1. 
         return self.white_move
@@ -75,21 +99,21 @@ class gnugo():
                       'F' : 5,
                       'G' : 6,
                       'H' : 7,
-                      'I' : 8,
-                      'J' : 9,
-                      'K' : 10,
-                      'L' : 11,
-                      'M' : 12,
-                      'N' : 13,
-                      'O' : 14,
-                      'P' : 15,
-                      'Q' : 16,
-                      'R' : 17,
-                      'S' : 18}
+                      'J' : 8,
+                      'K' : 9,
+                      'L' : 10,
+                      'M' : 11,
+                      'N' : 12,
+                      'O' : 13,
+                      'P' : 14,
+                      'Q' : 15,
+                      'R' : 16,
+                      'S' : 17,
+                      'T' : 18}
         
         numa_alpha_dict = {v: k for k, v in alpha_numa_dict.items()}
         
-        return numa_alpha_dict[x] + str(19 - y + 1)
+        return numa_alpha_dict[x] + str(19 - y)
         
     def map_from_board(self,alpha,numa):
         alpha_numa_dict = {'A' : 0,
@@ -100,20 +124,19 @@ class gnugo():
                       'F' : 5,
                       'G' : 6,
                       'H' : 7,
-                      'I' : 8,
-                      'J' : 9,
-                      'K' : 10,
-                      'L' : 11,
-                      'M' : 12,
-                      'N' : 13,
-                      'O' : 14,
-                      'P' : 15,
-                      'Q' : 16,
-                      'R' : 17,
-                      'S' : 18}
-        x,y = (alpha_numa_dict[alpha],self.board_size - int(numa) -1)
+                      'J' : 8,
+                      'K' : 9,
+                      'L' : 10,
+                      'M' : 11,
+                      'N' : 12,
+                      'O' : 13,
+                      'P' : 14,
+                      'Q' : 15,
+                      'R' : 16,
+                      'S' : 17,
+                      'T' : 18}
+        x,y = (alpha_numa_dict[alpha],self.board_size - int(numa))
         return x,y
-
 
     def show_board(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'showboard' + '\n')
@@ -129,22 +152,74 @@ class gnugo():
         return s
 
 
-obj = gnugo()
+    def place_filtered_moves(self,posX,posY):
+        '''Once the moves have been verified legal, we pass them to this 
+           function which places the stones on the board and gets gnugo's move'''
+        
+        move_b = self.get_move_black(posX,posY)
+        
+        move_w = self.get_move_white()
+        
+        self.get_score()
+        self.move_counter +=1
+        
+        if self.verbose:
+            print move_b,move_w
+            print self.show_board()
+        
+    def act(self, action):
+        global boardErrors
+        #must return an int reward
+        posX = action / self.board_size
+        posY = action % self.board_size
+        try:
+            self.board.move(posX, posY)
+        except BoardError:
+            self.boardErrors += 1
+            print 'BoardErrors: '+str(self.boardErrors)
+            #returning negative reward for illegal moves
+            return -1
 
-obj.start_gnugo()
+        #make DCNN move
+#        self.dcnn.placeStone(self.board, posX, posY)
+        self.place_filtered_moves(posX,posY)
+        self.move_counter += 1
+        
+        #First player in GoBoard is black, return black's score as reward
+        return int(self.score_black)
+        
 
-a = obj.get_move_black(1,2)
+#obj = gnugo()
+#
+#obj.start_gnugo()
+#obj.place_filtered_moves(0,0)
+#obj.place_filtered_moves(1,3)
+#obj.place_filtered_moves(1,4)
+#obj.place_filtered_moves(5,4)
+#obj.place_filtered_moves(9,4)
+#obj.place_filtered_moves(18,18)
+#
+#print obj.show_board()
+#
+##obj.show_board()
+#obj.close_gnugo()
 
-a = obj.get_move_white()
 
-a = obj.get_move_black(1,3)
 
-a = obj.get_move_white()
-
-a = obj.show_board()
-
-obj.close_gnugo()
-
-print obj.board_state
+#obj.start_gnugo()
+#
+#a = obj.get_move_black(1,2)
+#
+#a = obj.get_move_white()
+#
+#a = obj.get_move_black(1,3)
+#
+#a = obj.get_move_white()
+#
+#a = obj.show_board()
+#
+#obj.close_gnugo()
+#
+#print obj.board_state
 
 

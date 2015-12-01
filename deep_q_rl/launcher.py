@@ -15,6 +15,7 @@ import theano
 from GoExperiment import GoExperiment
 import ale_agent
 import q_network
+import pygnugo
 
 def process_args(args, defaults, description):
     """
@@ -189,9 +190,13 @@ def launch(args, defaults, description):
     if parameters.cudnn_deterministic:
         theano.config.dnn.conv.algo_bwd = 'deterministic'
 
-    goReferee = GoReferee(19)
+#    goReferee = GoReferee(19)
+    
+    gnugo_player = pygnugo.gnugo(board_size = 19,verbose = True)
+    
+    
 
-    num_actions = len(goReferee.getMinimalActionSet())
+    num_actions = len(gnugo_player.getMinimalActionSet())
 
     if parameters.nn_file is None:
         network = q_network.DeepQLearner(defaults.RESIZED_WIDTH,
@@ -224,7 +229,7 @@ def launch(args, defaults, description):
                                   parameters.update_frequency,
                                   rng)
 
-    experiment = GoExperiment(goReferee, agent,
+    experiment = GoExperiment(gnugo_player, agent,
                                               defaults.RESIZED_WIDTH,
                                               defaults.RESIZED_HEIGHT,
                                               parameters.resize_method,

@@ -41,7 +41,8 @@ class GoReferee():
             return -1
 
         #make DCNN move
-        self.dcnn.placeStone(self.board, posX, posY)
+#        self.dcnn.placeStone(self.board, posX, posY)
+        self.go.place_filtered_moves(self,posX,posY)
         self.move_counter += 1
         
         self.view_.redraw()
