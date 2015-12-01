@@ -11,6 +11,7 @@ import subprocess
 import re
 import numpy as np
 import theano
+import sys
 
 class gnugo():
     def __init__(self,board_size = 19,verbose = False):
@@ -45,6 +46,9 @@ class gnugo():
         return range(0,self.board_size * self.board_size)
     
     def start_gnugo(self):
+        self.board_state[0,:,:] = 0.
+        self.board_state[2,:,:] = 0.
+        self.board_state[1,:,:] = 0. 
         self.proc = subprocess.Popen(['gnugo', '--mode', 'gtp'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         self.proc.stdin.write(str(self.gnugo_ctr) + ' boardsize ' + str(self.board_size) + '\n')
         self.gnugo_ctr += 1
@@ -71,25 +75,29 @@ class gnugo():
         self.gnugo_ctr +=1      
         self.white_move = self.get_gnugo_out()
         self.white_move = self.white_move.strip().split()[1]
-        print 'Whites move is ' + self.white_move
         
         alpha,numa = (re.findall('[a-z|A-Z]',self.white_move)[0],re.findall('\d+',self.white_move)[0])
         
         self.white_move = self.map_from_board(alpha,numa)
-        print self.white_move
         
         self.board_state[2,self.white_move[0],self.white_move[1]] = 1. 
+        self.board_state[1,self.white_move[0],self.white_move[1]] = 1. 
         return self.white_move
     
     def get_move_black(self,b_x,b_y):
         self.move_black = (b_x,b_y)
         self.board_state[0,b_x,b_y] = 1.
-        
         place_stone = self.map_to_board(b_x,b_y)
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'play black ' + place_stone + '\n')
         self.gnugo_ctr +=1
         # Flush the output 
         temp = self.get_gnugo_out()
+        if 'illegal move' in temp:
+            print 'Illegal Move encountered exiting'
+            sys.exit()
+        self.board_state[0,self.move_black[0],self.move_black[1]] = 1. 
+        self.board_state[1,self.move_black[0],self.move_black[1]] = 1. 
+        
         return self.move_black
     
     def map_to_board(self,x,y):
@@ -157,7 +165,9 @@ class gnugo():
     def place_filtered_moves(self,posX,posY):
         '''Once the moves have been verified legal, we pass them to this 
            function which places the stones on the board and gets gnugo's move'''
-        
+        print 'Blacks move-------------------------'
+        print posX,posY
+        print '-------------------------------'
         move_b = self.get_move_black(posX,posY)
         
         move_w = self.get_move_white()
@@ -184,9 +194,10 @@ class gnugo():
             #returning negative reward for illegal moves
             return -1
 
-        #make DCNN move
-#        self.dcnn.placeStone(self.board, posX, posY)
         self.place_filtered_moves(posX,posY)
+        
+        self.board.move(self.white_move[0],self.white_move[1])
+        
         self.move_counter += 1
         
         #First player in GoBoard is black, return black's score as reward
