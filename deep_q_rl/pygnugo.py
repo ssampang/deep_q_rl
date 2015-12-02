@@ -30,7 +30,7 @@ class gnugo():
         self.move_counter = 0
     
     def game_over(self):
-        if self.move_counter % 200 == 0:
+        if self.move_counter % 50 == 0:
             return True
         else:
             return False
@@ -92,9 +92,9 @@ class gnugo():
         self.gnugo_ctr +=1
         # Flush the output 
         temp = self.get_gnugo_out()
-        if 'illegal move' in temp:
-            print 'Illegal Move encountered exiting'
-            sys.exit()
+#        if 'illegal move' in temp:
+#            print 'Illegal Move encountered exiting'
+#            sys.exit()
         self.board_state[0,self.move_black[0],self.move_black[1]] = 1. 
         self.board_state[1,self.move_black[0],self.move_black[1]] = 1. 
         
@@ -165,15 +165,11 @@ class gnugo():
     def place_filtered_moves(self,posX,posY):
         '''Once the moves have been verified legal, we pass them to this 
            function which places the stones on the board and gets gnugo's move'''
-        print 'Blacks move-------------------------'
-        print posX,posY
-        print '-------------------------------'
         move_b = self.get_move_black(posX,posY)
         
         move_w = self.get_move_white()
         
         self.get_score()
-        self.move_counter +=1
         
         if self.verbose:
             print 'Move Number: %d'%self.move_counter

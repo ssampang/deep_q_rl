@@ -42,6 +42,8 @@ class GoExperiment(object):
 
         self.terminal_lol = False # Most recent episode ended on a loss of life
         self.max_start_nullops = max_start_nullops
+        self.episode_reward = 0
+        self.total_reward = []
         self.rng = rng
 
     def run(self):
