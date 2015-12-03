@@ -93,9 +93,9 @@ class GoExperiment(object):
         if self.go.game_over():
             self.go.start_gnugo()
             # I dont see why we require this variable
-            self.screen_buffer = np.ones((self.buffer_length,
-                                       self.height, self.width),
-                                      dtype=np.uint8) * 127
+#            self.screen_buffer = np.ones((self.buffer_length,
+#                                       self.height, self.width),
+#                                      dtype=np.uint8) * 127
 #            self.go.reset_game()
 
 #            if self.max_start_nullops > 0:
@@ -172,7 +172,7 @@ class GoExperiment(object):
 
 
     def get_observation(self):
-        return self.go.board_state_2
+        return self.go.board_state
         """ Resize and merge the previous two screen images """
 
 #        assert self.buffer_count >= 2

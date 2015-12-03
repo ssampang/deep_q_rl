@@ -25,7 +25,7 @@ class gnugo():
         self.score_white = 0
         self.score_black = 0
         self.verbose = verbose
-        self.board_state = np.zeros((3,self.board_size,self.board_size),dtype=theano.config.floatX)
+        self.board_state = np.zeros((3,self.board_size,self.board_size),dtype=np.uint8)
         self.board_state_2 = np.ones((self.board_size, self.board_size),
                                       dtype=np.uint8) * 127
         self.board_state_3 = np.ones((self.board_size, self.board_size),
@@ -43,6 +43,7 @@ class gnugo():
         
     def reset_game(self):
         self.move_counter = 0
+        self.boardErrors = 0
         self.board = Board(self.board_size)
         self.white_pass = False
         self.close_gnugo()
@@ -60,7 +61,7 @@ class gnugo():
         self.proc.stdin.write(str(self.gnugo_ctr) + ' boardsize ' + str(self.board_size) + '\n')
         self.gnugo_ctr += 1
         start_game = self.get_gnugo_out()
-        print start_game
+        print '-------Starting a new game--------'
     
     def close_gnugo(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + 'quit' + '\n')
@@ -188,8 +189,6 @@ class gnugo():
         while not r == '\n':
             r = self.proc.stdout.readline()
             s += r
-        
-        print s
         
         return s
 

@@ -31,11 +31,12 @@ actions, and rewards.
         self.width = width
         self.height = height
         self.max_steps = max_steps
+        self.depth = 3
         self.phi_length = phi_length
         self.rng = rng
 
         # Allocate the circular buffers and indices.
-        self.imgs = np.zeros((max_steps, height, width), dtype='uint8')
+        self.imgs = np.zeros((max_steps, self.depth, height, width), dtype='uint8')
         self.actions = np.zeros(max_steps, dtype='int32')
         self.rewards = np.zeros(max_steps, dtype=floatX)
         self.terminal = np.zeros(max_steps, dtype='bool')
@@ -81,13 +82,16 @@ actions, and rewards.
         1, plus img.
 
         """
-        indexes = np.arange(self.top - self.phi_length + 1, self.top)
-
-        phi = np.empty((self.phi_length, self.height, self.width), dtype=floatX)
-        phi[0:self.phi_length - 1] = self.imgs.take(indexes,
-                                                    axis=0,
-                                                    mode='wrap')
-        phi[-1] = img
+#        indexes = np.arange(self.top - self.phi_length + 1, self.top)
+#
+#        phi = np.empty((self.phi_length, self.depth,self.height, self.width), dtype=floatX)
+#        phi[0:self.phi_length - 1] = self.imgs.take(indexes,
+#                                                    axis=0,
+#                                                    mode='wrap')
+#        phi[-1] = img
+        phi = np.empty((self.phi_length, self.depth,self.height, self.width), dtype=floatX)
+        phi = img.reshape(1,self.depth,self.width,self.height)
+        phi = phi.astype(floatX)
         return phi
 
     def random_batch(self, batch_size):
