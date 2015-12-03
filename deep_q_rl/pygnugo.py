@@ -70,10 +70,10 @@ class gnugo():
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'captures white'+ '\n')
         self.gnugo_ctr +=1
 #        score_white = self.score_white
-        score_white = re.findall('\d+',self.get_gnugo_out())[1]
+        score_white = int(re.findall('\d+',self.get_gnugo_out())[1])
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'captures black'+ '\n')
         self.gnugo_ctr +=1
-        score_black = re.findall('\d+',self.get_gnugo_out())[1]
+        score_black = int(re.findall('\d+',self.get_gnugo_out())[1])
         
         reward = (score_black - self.score_black)
         if score_white - self.score_white > 0:
@@ -224,7 +224,7 @@ class gnugo():
         sys.stdout.write('{0}\n'.format(view_))
         
         #First player in GoBoard is black, return black's score as reward
-        return int(self.score_black)
+        return reward
 
     def getScreenGrayscale(self, npImageBuffer):
         #returning the array state
