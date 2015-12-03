@@ -54,6 +54,7 @@ class GoExperiment(object):
         for epoch in range(1, self.num_epochs + 1):
             self.run_epoch(epoch, self.epoch_length)
             self.agent.finish_epoch(epoch)
+            print 'Epoch Number is complete: %d'%epoch
 
             if self.test_length > 0:
                 self.agent.start_testing()
@@ -171,7 +172,7 @@ class GoExperiment(object):
 
 
     def get_observation(self):
-        return self.screen_buffer[0];
+        return self.go.board_state_3
         """ Resize and merge the previous two screen images """
 
 #        assert self.buffer_count >= 2

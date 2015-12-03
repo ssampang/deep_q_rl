@@ -181,7 +181,7 @@ class NeuralAgent(object):
             if len(self.data_set) > self.replay_start_size:
                 self.epsilon = max(self.epsilon_min,
                                    self.epsilon - self.epsilon_rate)
-
+                                     
                 action = self._choose_action(self.data_set, self.epsilon,
                                              observation,
                                              np.clip(reward, -1, 1))
@@ -196,7 +196,7 @@ class NeuralAgent(object):
                                              observation,
                                              np.clip(reward, -1, 1))
 
-
+        print len(self.data_set)
         self.last_action = action
         self.last_img = observation
 

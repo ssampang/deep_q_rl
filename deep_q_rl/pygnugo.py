@@ -26,11 +26,15 @@ class gnugo():
         self.score_black = 0
         self.verbose = verbose
         self.board_state = np.zeros((3,self.board_size,self.board_size),dtype=theano.config.floatX)
+        self.board_state_2 = np.ones((self.board_size, self.board_size),
+                                      dtype=np.uint8) * 127
+        self.board_state_3 = np.ones((self.board_size, self.board_size),
+                                      dtype=np.uint8) * 127
         self.boardErrors = 0
         self.move_counter = 0
     
     def game_over(self):
-        if self.move_counter % 50 == 0:
+        if self.move_counter % 200 == 0:
             return True
         else:
             return False
@@ -65,10 +69,21 @@ class gnugo():
     def get_score(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'captures white'+ '\n')
         self.gnugo_ctr +=1
-        self.score_white = re.findall('\d+',self.get_gnugo_out())[1]
+#        score_white = self.score_white
+        score_white = re.findall('\d+',self.get_gnugo_out())[1]
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'captures black'+ '\n')
         self.gnugo_ctr +=1
-        self.score_black = re.findall('\d+',self.get_gnugo_out())[1]
+        score_black = re.findall('\d+',self.get_gnugo_out())[1]
+        
+        reward = (score_black - self.score_black)
+        if score_white - self.score_white > 0:
+            reward = -(score_white - self.score_white)
+        self.score_black = score_black
+        self.score_white = score_white
+        return reward
+    
+#    def get_reward()
+        
         
     def get_move_white(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'genmove white'+ '\n')
@@ -79,6 +94,8 @@ class gnugo():
         alpha,numa = (re.findall('[a-z|A-Z]',self.white_move)[0],re.findall('\d+',self.white_move)[0])
         
         self.white_move = self.map_from_board(alpha,numa)
+        
+        self.board_state_2[self.white_move[0],self.white_move[1]] = 255
         
         self.board_state[2,self.white_move[0],self.white_move[1]] = 1. 
         self.board_state[1,self.white_move[0],self.white_move[1]] = 1. 
@@ -95,6 +112,7 @@ class gnugo():
 #        if 'illegal move' in temp:
 #            print 'Illegal Move encountered exiting'
 #            sys.exit()
+        self.board_state_2[self.move_black[0],self.move_black[0]] = 0
         self.board_state[0,self.move_black[0],self.move_black[1]] = 1. 
         self.board_state[1,self.move_black[0],self.move_black[1]] = 1. 
         
@@ -169,7 +187,7 @@ class gnugo():
         
         move_w = self.get_move_white()
         
-        self.get_score()
+        reward = self.get_score()
         
         if self.verbose:
             print 'Move Number: %d'%self.move_counter
@@ -177,11 +195,13 @@ class gnugo():
             print 'Black Score = %d, White Score = %d'%(int(self.score_black),int(self.score_white))
             print self.show_board()
         
+        return reward
+        
     def act(self, action):
         global boardErrors
         #must return an int reward
-        posX = action / self.board_size
-        posY = action % self.board_size
+        posX = action % self.board_size
+        posY = action / self.board_size
         try:
             self.board.move(posX, posY)
         except BoardError:
@@ -190,15 +210,36 @@ class gnugo():
             #returning negative reward for illegal moves
             return -1
 
-        self.place_filtered_moves(posX,posY)
+        reward = self.place_filtered_moves(posX,posY)
         
         self.board.move(self.white_move[0],self.white_move[1])
         
         self.move_counter += 1
         
+        self.board_state_3 = self.getScreenGrayscale(self.board_state_3)
+        
+        view_ = View(self.board)
+        view_.redraw()
+        
+        sys.stdout.write('{0}\n'.format(view_))
+        
         #First player in GoBoard is black, return black's score as reward
         return int(self.score_black)
+
+    def getScreenGrayscale(self, npImageBuffer):
+        #returning the array state
+        for i in range(0,19):
+            for j in range(0,19):
+                if(self.board._array[i][j] == Location('black')):
+                    npImageBuffer[i][j] = 0
+                elif(self.board._array[i][j] == Location('white')):
+                    npImageBuffer[i][j] = 255
+                else:
+                    npImageBuffer[i][j] = 127
+        return npImageBuffer
         
+
+
 
 #obj = gnugo()
 #
