@@ -32,9 +32,11 @@ class gnugo():
                                       dtype=np.uint8) * 127
         self.boardErrors = 0
         self.move_counter = 0
+        self.white_pass = False
+        
     
     def game_over(self):
-        if self.move_counter % 200 == 0:
+        if self.move_counter % 200 == 0 or self.white_pass:
             return True
         else:
             return False
@@ -42,6 +44,7 @@ class gnugo():
     def reset_game(self):
         self.move_counter = 0
         self.board = Board(self.board_size)
+        self.white_pass = False
         self.close_gnugo()
     
     def getMinimalActionSet(self):
@@ -77,6 +80,7 @@ class gnugo():
         
         reward = (score_black - self.score_black)
         if score_white - self.score_white > 0:
+            print 'White captured move check reward -1'
             reward = -(score_white - self.score_white)
         self.score_black = score_black
         self.score_white = score_white
@@ -88,18 +92,25 @@ class gnugo():
     def get_move_white(self):
         self.proc.stdin.write(str(self.gnugo_ctr) + ' ' + 'genmove white'+ '\n')
         self.gnugo_ctr +=1      
-        self.white_move = self.get_gnugo_out()
-        self.white_move = self.white_move.strip().split()[1]
+        self.move_white = self.get_gnugo_out()
+        if 'PASS' not in self.move_white:
+            self.move_white = self.move_white.strip().split()[1]
         
-        alpha,numa = (re.findall('[a-z|A-Z]',self.white_move)[0],re.findall('\d+',self.white_move)[0])
+            alpha,numa = (re.findall('[a-z|A-Z]',self.move_white)[0],re.findall('\d+',self.move_white)[0])
         
-        self.white_move = self.map_from_board(alpha,numa)
+            self.move_white = self.map_from_board(alpha,numa)
         
-        self.board_state_2[self.white_move[0],self.white_move[1]] = 255
+            self.board_state_2[self.move_white[0],self.move_white[1]] = 255
         
-        self.board_state[2,self.white_move[0],self.white_move[1]] = 1. 
-        self.board_state[1,self.white_move[0],self.white_move[1]] = 1. 
-        return self.white_move
+            self.board_state[2,self.move_white[0],self.move_white[1]] = 1. 
+            self.board_state[1,self.move_white[0],self.move_white[1]] = 1. 
+        else:
+            # End game if white passes
+            print 'White has passed the game!'
+            self.move_white = None
+            self.white_pass = True
+        
+        return self.move_white
     
     def get_move_black(self,b_x,b_y):
         self.move_black = (b_x,b_y)
@@ -177,6 +188,9 @@ class gnugo():
         while not r == '\n':
             r = self.proc.stdout.readline()
             s += r
+        
+        print s
+        
         return s
 
 
@@ -191,9 +205,10 @@ class gnugo():
         
         if self.verbose:
             print 'Move Number: %d'%self.move_counter
-            print 'Black plays: (%d,%d), White plays: (%d,%d)'%(move_b[0],move_b[1],move_w[0],move_w[1])
-            print 'Black Score = %d, White Score = %d'%(int(self.score_black),int(self.score_white))
-            print self.show_board()
+            if move_w != None:
+                print 'Black plays: (%d,%d), White plays: (%d,%d)'%(move_b[0],move_b[1],move_w[0],move_w[1])
+                print 'Black Score = %d, White Score = %d'%(int(self.score_black),int(self.score_white))
+                print self.show_board()
         
         return reward
         
@@ -209,19 +224,23 @@ class gnugo():
             print 'BoardErrors: '+str(self.boardErrors)
             #returning negative reward for illegal moves
             return -1
-
-        reward = self.place_filtered_moves(posX,posY)
         
-        self.board.move(self.white_move[0],self.white_move[1])
+        
+            
+        reward = self.place_filtered_moves(posX,posY)
+        if self.move_white == None:
+            return 0
+        
+        self.board.move(self.move_white[0],self.move_white[1])
         
         self.move_counter += 1
         
         self.board_state_3 = self.getScreenGrayscale(self.board_state_3)
         
-        view_ = View(self.board)
-        view_.redraw()
+#        view_ = View(self.board)
+#        view_.redraw()
         
-        sys.stdout.write('{0}\n'.format(view_))
+#        sys.stdout.write('{0}\n'.format(view_))
         
         #First player in GoBoard is black, return black's score as reward
         return reward

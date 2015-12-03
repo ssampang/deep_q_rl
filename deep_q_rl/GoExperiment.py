@@ -118,7 +118,7 @@ class GoExperiment(object):
         
         reward = self.go.act(action)
         
-        print reward
+        print 'The current Reward is %d'%reward
         
 	   #not sure if we need this index getScreenGrayscale stuff....
         index = self.buffer_count % self.buffer_length
@@ -172,7 +172,7 @@ class GoExperiment(object):
 
 
     def get_observation(self):
-        return self.go.board_state_3
+        return self.go.board_state_2
         """ Resize and merge the previous two screen images """
 
 #        assert self.buffer_count >= 2
