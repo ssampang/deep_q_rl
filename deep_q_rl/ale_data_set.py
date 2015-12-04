@@ -70,7 +70,7 @@ actions, and rewards.
         """Return an approximate count of stored state transitions."""
         # TODO: Properly account for indices which can't be used, as in
         # random_batch's check.
-        return max(0, self.size - self.phi_length)
+        return max(0, self.size)
 
     def last_phi(self):
         """Return the most recent phi (sequence of image frames)."""
@@ -101,7 +101,7 @@ next_states for batch_size randomly chosen state transitions.
         """
         # Allocate the response.
         states = np.zeros((batch_size,
-                           self.phi_length,
+                           self.depth,
                            self.height,
                            self.width),
                           dtype='uint8')
@@ -109,7 +109,7 @@ next_states for batch_size randomly chosen state transitions.
         rewards = np.zeros((batch_size, 1), dtype=floatX)
         terminal = np.zeros((batch_size, 1), dtype='bool')
         next_states = np.zeros((batch_size,
-                                self.phi_length,
+                                self.depth,
                                 self.height,
                                 self.width),
                                dtype='uint8')

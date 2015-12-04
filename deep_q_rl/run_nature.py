@@ -15,7 +15,7 @@ class Defaults:
     # ----------------------
     # Experiment Parameters
     # ----------------------
-    STEPS_PER_EPOCH = 1000
+    STEPS_PER_EPOCH = 2000
     EPOCHS = 200
     STEPS_PER_TEST = 400
 
@@ -50,9 +50,9 @@ class Defaults:
     UPDATE_FREQUENCY = 1
     REPLAY_MEMORY_SIZE = 10000
     BATCH_SIZE = 128
-    NETWORK_TYPE = "go_dnn_2"
+    NETWORK_TYPE = "go_dnn_1"
     FREEZE_INTERVAL = 10000
-    REPLAY_START_SIZE = 1000
+    REPLAY_START_SIZE = 2000
     RESIZE_METHOD = 'scale'
     RESIZED_WIDTH = 19
     RESIZED_HEIGHT = 19
