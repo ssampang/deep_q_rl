@@ -5,3 +5,5 @@ csv
 dummy*
 breakout*
 *.log
+.DS_Store
+

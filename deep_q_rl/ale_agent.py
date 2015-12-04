@@ -33,8 +33,9 @@ class NeuralAgent(object):
         self.replay_start_size = replay_start_size
         self.update_frequency = update_frequency
         self.rng = rng
+        self.phi_length = 1
 
-        self.phi_length = self.network.input_depth
+        self.input_depth = self.network.input_depth
         self.image_width = self.network.input_width
         self.image_height = self.network.input_height
 

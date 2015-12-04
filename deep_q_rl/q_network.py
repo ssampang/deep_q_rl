@@ -29,7 +29,7 @@ class DeepQLearner:
                  input_depth, discount, learning_rate, rho,
                  rms_epsilon, momentum, clip_delta, freeze_interval,
                  batch_size, network_type, update_rule,
-                 batch_accumulator, rng, input_scale=255.0):
+                 batch_accumulator, rng, input_scale=1.0):
 
         self.input_width = input_width
         self.input_height = input_height
@@ -169,6 +169,14 @@ class DeepQLearner:
         elif network_type == "linear":
             return self.build_linear_network(input_width, input_height,
                                              output_dim, num_frames, batch_size)
+        elif network_type == "go_dnn_1":
+            return self.build_go_network_1(input_width, input_height,
+                                               output_dim, num_frames,
+                                               batch_size)
+        elif network_type == "go_dnn_2":
+            return self.build_dnn_go_network_1(input_width, input_height,
+                                               output_dim, num_frames,
+                                               batch_size)
         else:
             raise ValueError("Unrecognized network: {}".format(network_type))
 
@@ -203,7 +211,7 @@ class DeepQLearner:
         return np.sqrt(loss)
 
     def q_vals(self, state):
-        states = np.zeros((self.batch_size, self.num_frames, self.input_height,
+        states = np.zeros((self.batch_size, self.input_depth, self.input_height,
                            self.input_width), dtype=theano.config.floatX)
         states[0, ...] = state
         self.states_shared.set_value(states)
@@ -473,6 +481,71 @@ class DeepQLearner:
             b=None
         )
 
+        return l_out
+    
+    def build_go_network_1(self, input_width, input_height, output_dim,
+                            num_frames, batch_size):
+
+#       noOflayers = 7;
+        from lasagne.layers import Conv2DLayer
+        l_in = lasagne.layers.InputLayer(
+           shape=(batch_size, num_frames, input_width, input_height)
+       )
+        prevLayer = l_in
+        for layer in range(1):
+           prevLayer = Conv2DLayer(
+                   prevLayer,
+                   num_filters=64,
+                   filter_size=(5, 5),
+                   stride=(2, 2),
+                   nonlinearity=lasagne.nonlinearities.rectify,
+                   #W=lasagne.init.HeUniform(),
+                   W=lasagne.init.Normal(.01),
+                   b=lasagne.init.Constant(.1)
+               )
+
+        l_out = lasagne.layers.DenseLayer(
+           prevLayer,
+           num_units=361,
+           nonlinearity=lasagne.nonlinearities.softmax,
+           #W=lasagne.init.HeUniform(),
+           W=lasagne.init.Normal(.01),
+           b=lasagne.init.Constant(.1)
+       )
+       
+        return l_out
+
+    def build_dnn_go_network_1(self, input_width, input_height, output_dim,
+                            num_frames, batch_size):
+
+#       noOflayers = 7;
+        from lasagne.layers import dnn
+        
+        l_in = lasagne.layers.InputLayer(
+           shape=(batch_size, num_frames, input_width, input_height)
+       )
+        prevLayer = l_in
+        for layer in range(1):
+           prevLayer = dnn.Conv2DDNNLayer(
+                   prevLayer,
+                   num_filters=64,
+                   filter_size=(5, 5),
+                   stride=(2, 2),
+                   nonlinearity=lasagne.nonlinearities.rectify,
+                   #W=lasagne.init.HeUniform(),
+                   W=lasagne.init.Normal(.01),
+                   b=lasagne.init.Constant(.1)
+               )
+
+        l_out = lasagne.layers.DenseLayer(
+           prevLayer,
+           num_units=361,
+           nonlinearity=lasagne.nonlinearities.softmax,
+           #W=lasagne.init.HeUniform(),
+           W=lasagne.init.Normal(.01),
+           b=lasagne.init.Constant(.1)
+       )
+       
         return l_out
 
 def main():

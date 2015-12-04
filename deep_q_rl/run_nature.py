@@ -50,7 +50,7 @@ class Defaults:
     UPDATE_FREQUENCY = 1
     REPLAY_MEMORY_SIZE = 10000
     BATCH_SIZE = 128
-    NETWORK_TYPE = "linear"
+    NETWORK_TYPE = "go_dnn_2"
     FREEZE_INTERVAL = 10000
     REPLAY_START_SIZE = 1000
     RESIZE_METHOD = 'scale'
