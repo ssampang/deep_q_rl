@@ -4,3 +4,4 @@ csv
 *.swp
 dummy*
 breakout*
+*.log

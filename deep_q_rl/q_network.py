@@ -26,7 +26,7 @@ class DeepQLearner:
     """
 
     def __init__(self, input_width, input_height, num_actions,
-                 num_frames, discount, learning_rate, rho,
+                 input_depth, discount, learning_rate, rho,
                  rms_epsilon, momentum, clip_delta, freeze_interval,
                  batch_size, network_type, update_rule,
                  batch_accumulator, rng, input_scale=255.0):
@@ -34,7 +34,7 @@ class DeepQLearner:
         self.input_width = input_width
         self.input_height = input_height
         self.num_actions = num_actions
-        self.num_frames = num_frames
+        self.input_depth = input_depth
         self.batch_size = batch_size
         self.discount = discount
         self.rho = rho
@@ -50,11 +50,11 @@ class DeepQLearner:
         self.update_counter = 0
 
         self.l_out = self.build_network(network_type, input_width, input_height,
-                                        num_actions, num_frames, batch_size)
+                                        num_actions, input_depth, batch_size)
         if self.freeze_interval > 0:
             self.next_l_out = self.build_network(network_type, input_width,
                                                  input_height, num_actions,
-                                                 num_frames, batch_size)
+                                                 input_depth, batch_size)
             self.reset_q_hat()
 
         states = T.tensor4('states')
@@ -64,11 +64,11 @@ class DeepQLearner:
         terminals = T.icol('terminals')
 
         self.states_shared = theano.shared(
-            np.zeros((batch_size, num_frames, input_height, input_width),
+            np.zeros((batch_size, input_depth, input_height, input_width),
                      dtype=theano.config.floatX))
 
         self.next_states_shared = theano.shared(
-            np.zeros((batch_size, num_frames, input_height, input_width),
+            np.zeros((batch_size, input_depth, input_height, input_width),
                      dtype=theano.config.floatX))
 
         self.rewards_shared = theano.shared(

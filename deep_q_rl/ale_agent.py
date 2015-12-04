@@ -34,7 +34,7 @@ class NeuralAgent(object):
         self.update_frequency = update_frequency
         self.rng = rng
 
-        self.phi_length = self.network.num_frames
+        self.phi_length = self.network.input_depth
         self.image_width = self.network.input_width
         self.image_height = self.network.input_height
 
@@ -209,11 +209,11 @@ class NeuralAgent(object):
         """
 
         data_set.add_sample(self.last_img, self.last_action, reward, False)
-        if self.step_counter >= self.phi_length:
-            phi = data_set.phi(cur_img)
-            action = self.network.choose_action(phi, epsilon)
-        else:
-            action = self.rng.randint(0, self.num_actions)
+#        if self.step_counter >= self.phi_length:
+        phi = data_set.phi(cur_img)
+        action = self.network.choose_action(phi, epsilon)
+#        else:
+#        action = self.rng.randint(0, self.num_actions)
 
         return action
 

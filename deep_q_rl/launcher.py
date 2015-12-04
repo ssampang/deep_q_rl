@@ -92,8 +92,8 @@ def process_args(args, defaults, description):
                         type=float, default=defaults.EPSILON_DECAY,
                         help=('Number of steps to minimum epsilon. ' +
                               '(default: %(default)s)'))
-    parser.add_argument('--phi-length', dest="phi_length",
-                        type=int, default=defaults.PHI_LENGTH,
+    parser.add_argument('--input-depth', dest="depth",
+                        type=int, default=defaults.DEPTH,
                         help=('Number of recent frames used to represent ' +
                               'state. (default: %(default)s)'))
     parser.add_argument('--max-history', dest="replay_memory_size",
@@ -202,7 +202,7 @@ def launch(args, defaults, description):
         network = q_network.DeepQLearner(defaults.RESIZED_WIDTH,
                                          defaults.RESIZED_HEIGHT,
                                          num_actions,
-                                         parameters.phi_length,
+                                         parameters.depth,
                                          parameters.discount,
                                          parameters.learning_rate,
                                          parameters.rms_decay,
