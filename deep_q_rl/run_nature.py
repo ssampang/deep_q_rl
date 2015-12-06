@@ -18,13 +18,11 @@ class Defaults:
     STEPS_PER_EPOCH = 2000
     EPOCHS = 200
     STEPS_PER_TEST = 400
+    BOARD_SIZE = 19
 
     # ----------------------
     # ALE Parameters
     # ----------------------
-    BASE_ROM_PATH = "../roms/"
-    ROM = 'breakout.bin'
-    FRAME_SKIP = 1
     REPEAT_ACTION_PROBABILITY = 0
 
     # ----------------------
@@ -36,6 +34,7 @@ class Defaults:
     DISCOUNT = .99
     RMS_DECAY = .95 # (Rho)
     RMS_EPSILON = .01
+    DEPTH = 3
     MOMENTUM = 0 # Note that the "momentum" value mentioned in the Nature
                  # paper is not used in the same way as a traditional momentum
                  # term.  It is used to track gradient for the purpose of
@@ -46,23 +45,15 @@ class Defaults:
     EPSILON_START = 1.0
     EPSILON_MIN = .1
     EPSILON_DECAY = 1000
-    DEPTH = 3
     UPDATE_FREQUENCY = 1
     REPLAY_MEMORY_SIZE = 10000
     BATCH_SIZE = 128
-    NETWORK_TYPE = "go_dnn_1"
+    NETWORK_TYPE = "go_dnn_2"
     FREEZE_INTERVAL = 10000
-    REPLAY_START_SIZE = 2000
-    RESIZE_METHOD = 'scale'
-    RESIZED_WIDTH = 19
-    RESIZED_HEIGHT = 19
-    DEATH_ENDS_EPISODE = 'false'
-    MAX_START_NULLOPS = 30
+    REPLAY_START_SIZE = 1000
     DETERMINISTIC = True
     CUDNN_DETERMINISTIC = False
 
 if __name__ == "__main__":
-    args = ['--rom','dummy']
-    #launcher.launch(sys.argv[1:], Defaults, __doc__)
-    launcher.launch(args, Defaults, __doc__)
+    launcher.launch([], Defaults, __doc__)
     

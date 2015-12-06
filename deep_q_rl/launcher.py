@@ -7,7 +7,6 @@ run_nips.py or run_nature.py.
 import os
 import argparse
 import logging
-from GoReferee import GoReferee
 import cPickle
 import numpy as np
 import theano
@@ -27,8 +26,6 @@ def process_args(args, defaults, description):
     description - a string to display at the top of the help message.
     """
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-r', '--rom', dest="rom", default=defaults.ROM,
-                        help='ROM to run (default: %(default)s)')
     parser.add_argument('-e', '--epochs', dest="epochs", type=int,
                         default=defaults.EPOCHS,
                         help='Number of training epochs (default: %(default)s)')
@@ -45,10 +42,6 @@ def process_args(args, defaults, description):
                         default=None,
                         help='Experiment name prefix '
                         '(default is the name of the game)')
-    parser.add_argument('--frame-skip', dest="frame_skip",
-                        default=defaults.FRAME_SKIP, type=int,
-                        help='Every how many frames to process '
-                        '(default: %(default)s)')
     parser.add_argument('--repeat-action-probability',
                         dest="repeat_action_probability",
                         default=defaults.REPEAT_ACTION_PROBABILITY, type=float,
@@ -92,9 +85,13 @@ def process_args(args, defaults, description):
                         type=float, default=defaults.EPSILON_DECAY,
                         help=('Number of steps to minimum epsilon. ' +
                               '(default: %(default)s)'))
+    parser.add_argument('--board-size', dest="board_size",
+                        type=int, default=defaults.BOARD_SIZE,
+                        help=('Size of the go board ' +
+                              '(default: %(default)s)'))
     parser.add_argument('--input-depth', dest="depth",
                         type=int, default=defaults.DEPTH,
-                        help=('Number of recent frames used to represent ' +
+                        help=('Number of channels used to represent the board ' +
                               'state. (default: %(default)s)'))
     parser.add_argument('--max-history', dest="replay_memory_size",
                         type=int, default=defaults.REPLAY_MEMORY_SIZE,
@@ -119,18 +116,8 @@ def process_args(args, defaults, description):
                         type=int, default=defaults.REPLAY_START_SIZE,
                         help=('Number of random steps before training. ' +
                               '(default: %(default)s)'))
-    parser.add_argument('--resize-method', dest="resize_method",
-                        type=str, default=defaults.RESIZE_METHOD,
-                        help=('crop|scale (default: %(default)s)'))
     parser.add_argument('--nn-file', dest="nn_file", type=str, default=None,
                         help='Pickle file containing trained net.')
-    parser.add_argument('--death-ends-episode', dest="death_ends_episode",
-                        type=str, default=defaults.DEATH_ENDS_EPISODE,
-                        help=('true|false (default: %(default)s)'))
-    parser.add_argument('--max-start-nullops', dest="max_start_nullops",
-                        type=int, default=defaults.MAX_START_NULLOPS,
-                        help=('Maximum number of null-ops at the start ' +
-                              'of games. (default: %(default)s)'))
     parser.add_argument('--deterministic', dest="deterministic",
                         type=bool, default=defaults.DETERMINISTIC,
                         help=('Whether to use deterministic parameters ' +
@@ -141,16 +128,6 @@ def process_args(args, defaults, description):
                               '(default: %(default)s)'))
 
     parameters = parser.parse_args(args)
-    if parameters.experiment_prefix is None:
-        name = os.path.splitext(os.path.basename(parameters.rom))[0]
-        parameters.experiment_prefix = name
-
-    if parameters.death_ends_episode == 'true':
-        parameters.death_ends_episode = True
-    elif parameters.death_ends_episode == 'false':
-        parameters.death_ends_episode = False
-    else:
-        raise ValueError("--death-ends-episode must be true or false")
 
     if parameters.freeze_interval > 0:
         # This addresses an inconsistency between the Nature paper and
@@ -175,34 +152,24 @@ def launch(args, defaults, description):
 
     logging.basicConfig(level=logging.INFO)
     parameters = process_args(args, defaults, description)
+    parameters.experiment_prefix = 'Go'
 
-    if parameters.rom.endswith('.bin'):
-        rom = parameters.rom
-    else:
-        rom = "%s.bin" % parameters.rom
-    full_rom_path = os.path.join(defaults.BASE_ROM_PATH, rom)
+    if parameters.cudnn_deterministic:
+        theano.config.dnn.conv.algo_bwd = 'deterministic'
+
+    gnugo_player = pygnugo.gnugo(board_size = parameters.board_size,verbose = True)
+
+    num_actions = len(gnugo_player.getMinimalActionSet())
 
     if parameters.deterministic:
         rng = np.random.RandomState(123456)
     else:
         rng = np.random.RandomState()
 
-    if parameters.cudnn_deterministic:
-        theano.config.dnn.conv.algo_bwd = 'deterministic'
-
-#    goReferee = GoReferee(19)
-    
-    gnugo_player = pygnugo.gnugo(board_size = 19,verbose = True)
-    
-    
-
-    num_actions = len(gnugo_player.getMinimalActionSet())
-
     if parameters.nn_file is None:
-        network = q_network.DeepQLearner(defaults.RESIZED_WIDTH,
-                                         defaults.RESIZED_HEIGHT,
-                                         num_actions,
+        network = q_network.DeepQLearner(parameters.board_size,
                                          parameters.depth,
+                                         num_actions,
                                          parameters.discount,
                                          parameters.learning_rate,
                                          parameters.rms_decay,
@@ -230,17 +197,9 @@ def launch(args, defaults, description):
                                   rng)
 
     experiment = GoExperiment(gnugo_player, agent,
-                                              defaults.RESIZED_WIDTH,
-                                              defaults.RESIZED_HEIGHT,
-                                              parameters.resize_method,
                                               parameters.epochs,
                                               parameters.steps_per_epoch,
-                                              parameters.steps_per_test,
-                                              parameters.frame_skip,
-                                              parameters.death_ends_episode,
-                                              parameters.max_start_nullops,
-                                              rng)
-
+                                              parameters.steps_per_test)
 
     experiment.run()
 

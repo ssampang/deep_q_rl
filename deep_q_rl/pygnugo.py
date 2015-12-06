@@ -19,13 +19,14 @@ class gnugo():
         self.color = 'black'
         self.gnugo_ctr = 1
         self.board_size = board_size
+        self.board_depth = 3
         self.board = Board(self.board_size)
         self.move_white = None
         self.move_black = None
         self.score_white = 0
         self.score_black = 0
         self.verbose = verbose
-        self.board_state = np.zeros((3,self.board_size,self.board_size),dtype=np.uint8)
+        self.board_state = np.zeros((self.board_depth,self.board_size,self.board_size),dtype=np.uint8)
         self.board_state_2 = np.ones((self.board_size, self.board_size),
                                       dtype=np.uint8) * 127
         self.board_state_3 = np.ones((self.board_size, self.board_size),

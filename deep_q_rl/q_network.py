@@ -25,16 +25,15 @@ class DeepQLearner:
     Deep Q-learning network using Lasagne.
     """
 
-    def __init__(self, input_width, input_height, num_actions,
-                 input_depth, discount, learning_rate, rho,
+    def __init__(self, board_size, input_depth,
+                 num_actions, discount, learning_rate, rho,
                  rms_epsilon, momentum, clip_delta, freeze_interval,
                  batch_size, network_type, update_rule,
                  batch_accumulator, rng, input_scale=1.0):
 
-        self.input_width = input_width
-        self.input_height = input_height
-        self.num_actions = num_actions
+        self.board_size = board_size
         self.input_depth = input_depth
+        self.num_actions = num_actions
         self.batch_size = batch_size
         self.discount = discount
         self.rho = rho
@@ -49,11 +48,11 @@ class DeepQLearner:
 
         self.update_counter = 0
 
-        self.l_out = self.build_network(network_type, input_width, input_height,
+        self.l_out = self.build_network(network_type, board_size, board_size,
                                         num_actions, input_depth, batch_size)
         if self.freeze_interval > 0:
-            self.next_l_out = self.build_network(network_type, input_width,
-                                                 input_height, num_actions,
+            self.next_l_out = self.build_network(network_type, board_size,
+                                                 board_size, num_actions,
                                                  input_depth, batch_size)
             self.reset_q_hat()
 
@@ -64,11 +63,11 @@ class DeepQLearner:
         terminals = T.icol('terminals')
 
         self.states_shared = theano.shared(
-            np.zeros((batch_size, input_depth, input_height, input_width),
+            np.zeros((batch_size, input_depth, board_size, board_size),
                      dtype=theano.config.floatX))
 
         self.next_states_shared = theano.shared(
-            np.zeros((batch_size, input_depth, input_height, input_width),
+            np.zeros((batch_size, input_depth, board_size, board_size),
                      dtype=theano.config.floatX))
 
         self.rewards_shared = theano.shared(
@@ -211,8 +210,8 @@ class DeepQLearner:
         return np.sqrt(loss)
 
     def q_vals(self, state):
-        states = np.zeros((self.batch_size, self.input_depth, self.input_height,
-                           self.input_width), dtype=theano.config.floatX)
+        states = np.zeros((self.batch_size, self.input_depth, self.board_size,
+                           self.board_size), dtype=theano.config.floatX)
         states[0, ...] = state
         self.states_shared.set_value(states)
         return self._q_vals()[0]

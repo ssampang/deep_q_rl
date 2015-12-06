@@ -7,44 +7,17 @@ Author: Nathan Sprague
 import logging
 import numpy as np
 
-# Number of rows to crop off the bottom of the (downsampled) screen.
-# This is appropriate for breakout, but it may need to be modified
-# for other games.
-CROP_OFFSET = 8
 import theano 
 
-
 class GoExperiment(object):
-    def __init__(self, go, agent, resized_width, resized_height,
-                 resize_method, num_epochs, epoch_length, test_length,
-                 frame_skip, death_ends_episode, max_start_nullops, rng):
+    def __init__(self, go, agent, num_epochs, epoch_length, test_length):
         self.go = go
         self.agent = agent
         self.num_epochs = num_epochs
         self.epoch_length = epoch_length
         self.test_length = test_length
-        self.frame_skip = frame_skip
-        self.death_ends_episode = death_ends_episode
         self.min_action_set = self.go.getMinimalActionSet()
-        self.resized_width = resized_width
-        self.resized_height = resized_height
-        self.resize_method = resize_method
         self.width, self.height = self.go.board_size,self.go.board_size
-
-        self.buffer_length = 1
-        self.buffer_count = 0
-        
-        self.board_state = np.zeros((3,19,19),dtype =theano.config.floatX)
-        
-        self.screen_buffer = np.ones((self.buffer_length,
-                                       self.height, self.width),
-                                      dtype=np.uint8) * 127
-
-        self.terminal_lol = False # Most recent episode ended on a loss of life
-        self.max_start_nullops = max_start_nullops
-        self.episode_reward = 0
-        self.total_reward = []
-        self.rng = rng
 
     def run(self):
         """
@@ -72,7 +45,6 @@ class GoExperiment(object):
         testing - True if this Epoch is used for testing and not training
 
         """
-        self.terminal_lol = False # Make sure each epoch starts with a reset.
         steps_left = num_steps
         while steps_left > 0:
             prefix = "testing" if testing else "training"
@@ -89,25 +61,8 @@ class GoExperiment(object):
         performs a randomly determined number of null action to randomize
         the initial game state."""
 
-#        if not self.terminal_lol or self.go.game_over():
         if self.go.game_over():
             self.go.start_gnugo()
-            # I dont see why we require this variable
-#            self.screen_buffer = np.ones((self.buffer_length,
-#                                       self.height, self.width),
-#                                      dtype=np.uint8) * 127
-#            self.go.reset_game()
-
-#            if self.max_start_nullops > 0:
-#                # Assuming the learner is white we play a random move on the board. 
-#                random_actions = self.rng.randint(0, self.max_start_nullops+1)
-#                for _ in range(random_actions):
-#                    self._act(0) # Null action
-
-        # Make sure the screen buffer is filled at the beginning of
-        # each episode...
-#        self._act(0)
-#        self._act(0)
 
     def _act(self, action):
         """Perform the indicated action for a single frame, return the
@@ -117,23 +72,13 @@ class GoExperiment(object):
         """
         
         reward = self.go.act(action)
-        
         print 'The current Reward is %d'%reward
-        
-	   #not sure if we need this index getScreenGrayscale stuff....
-        index = self.buffer_count % self.buffer_length
-
-#        self.go.getScreenGrayscale(self.screen_buffer[index, ...])
-
-        self.buffer_count += 1
         return reward
 
     def _step(self, action):
         """ Repeat one action the appopriate number of times and return
         the summed reward. """
-        reward = 0
-#        for _ in range(self.frame_skip):
-        reward += self._act(action)
+        reward = self._act(action)
 
         return reward
 
@@ -156,9 +101,6 @@ class GoExperiment(object):
         num_steps = 0
         while True:
             reward = self._step(action)
-#            self.terminal_lol = (self.death_ends_episode and not testing)
-            
-#            terminal = self.go.game_over() or self.terminal_lol
             terminal = self.go.game_over() 
             
             num_steps += 1
@@ -173,37 +115,3 @@ class GoExperiment(object):
 
     def get_observation(self):
         return self.go.board_state
-        """ Resize and merge the previous two screen images """
-
-#        assert self.buffer_count >= 2
-#        index = self.buffer_count % self.buffer_length - 1
-#        max_image = np.maximum(self.screen_buffer[index, ...],
-#                               self.screen_buffer[index - 1, ...])
-#        return self.resize_image(max_image)
-
-    def resize_image(self, image):
-        return image
-        # """ Appropriately resize a single image """
-        #
-        # if self.resize_method == 'crop':
-        #     # resize keeping aspect ratio
-        #     resize_height = int(round(
-        #         float(self.height) * self.resized_width / self.width))
-        #
-        #     resized = cv2.resize(image,
-        #                          (self.resized_width, resize_height),
-        #                          interpolation=cv2.INTER_LINEAR)
-        #
-        #     # Crop the part we want
-        #     crop_y_cutoff = resize_height - CROP_OFFSET - self.resized_height
-        #     cropped = resized[crop_y_cutoff:
-        #                       crop_y_cutoff + self.resized_height, :]
-        #
-        #     return cropped
-        # elif self.resize_method == 'scale':
-        #     return cv2.resize(image,
-        #                       (self.resized_width, self.resized_height),
-        #                       interpolation=cv2.INTER_LINEAR)
-        # else:
-        #     raise ValueError('Unrecognized image resize method.')
-

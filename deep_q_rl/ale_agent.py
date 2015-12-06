@@ -36,8 +36,8 @@ class NeuralAgent(object):
         self.phi_length = 1
 
         self.input_depth = self.network.input_depth
-        self.image_width = self.network.input_width
-        self.image_height = self.network.input_height
+        self.image_width = self.network.board_size
+        self.image_height = self.network.board_size
 
         # CREATE A FOLDER TO HOLD RESULTS
         time_str = time.strftime("_%m-%d-%H-%M_", time.gmtime())
