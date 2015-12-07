@@ -147,7 +147,7 @@ class gnugo():
         
         numa_alpha_dict = {v: k for k, v in alpha_numa_dict.items()}
         
-        return numa_alpha_dict[x] + str(19 - y)
+        return numa_alpha_dict[x] + str(self.board_size - y)
         
     def map_from_board(self,alpha,numa):
         alpha_numa_dict = {'A' : 0,

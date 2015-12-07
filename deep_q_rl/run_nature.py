@@ -18,7 +18,7 @@ class Defaults:
     STEPS_PER_EPOCH = 2000
     EPOCHS = 200
     STEPS_PER_TEST = 400
-    BOARD_SIZE = 19
+    BOARD_SIZE = 9
 
     # ----------------------
     # ALE Parameters
@@ -48,7 +48,7 @@ class Defaults:
     UPDATE_FREQUENCY = 1
     REPLAY_MEMORY_SIZE = 10000
     BATCH_SIZE = 128
-    NETWORK_TYPE = "go_dnn_2"
+    NETWORK_TYPE = "go_dnn_3"
     FREEZE_INTERVAL = 10000
     REPLAY_START_SIZE = 1000
     DETERMINISTIC = True

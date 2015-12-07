@@ -176,6 +176,10 @@ class DeepQLearner:
             return self.build_dnn_go_network_1(input_width, input_height,
                                                output_dim, num_frames,
                                                batch_size)
+        elif network_type == "go_dnn_3":
+            return self.build_dnn_go_network_2(input_width, input_height,
+                                               output_dim, num_frames,
+                                               batch_size)
         else:
             raise ValueError("Unrecognized network: {}".format(network_type))
 
@@ -505,7 +509,7 @@ class DeepQLearner:
 
         l_out = lasagne.layers.DenseLayer(
            prevLayer,
-           num_units=361,
+           num_units=self.board_size*self.board_size,
            nonlinearity=lasagne.nonlinearities.softmax,
            #W=lasagne.init.HeUniform(),
            W=lasagne.init.Normal(.01),
@@ -538,7 +542,60 @@ class DeepQLearner:
 
         l_out = lasagne.layers.DenseLayer(
            prevLayer,
-           num_units=361,
+           num_units=self.board_size*self.board_size,
+           nonlinearity=lasagne.nonlinearities.softmax,
+           #W=lasagne.init.HeUniform(),
+           W=lasagne.init.Normal(.01),
+           b=lasagne.init.Constant(.1)
+       )
+       
+        return l_out
+
+    def build_dnn_go_network_2(self, input_width, input_height, output_dim,
+                            num_frames, batch_size):
+
+        from lasagne.layers import dnn
+        
+        l_in = lasagne.layers.InputLayer(
+           shape=(batch_size, num_frames, input_width, input_height)
+       )
+        prevLayer = dnn.Conv2DDNNLayer(
+              l_in,
+              num_filters=64,
+              filter_size=(4, 4),
+              stride=1,
+              pad=2,
+              nonlinearity=lasagne.nonlinearities.rectify,
+              #W=lasagne.init.HeUniform(),
+              W=lasagne.init.Normal(.01),
+              b=lasagne.init.Constant(.1)
+           )
+
+        prevLayer = dnn.Conv2DDNNLayer(
+              prevLayer,
+              num_filters=48,
+              filter_size=(4, 4),
+              stride=1,
+              pad=2,
+              nonlinearity=lasagne.nonlinearities.rectify,
+              #W=lasagne.init.HeUniform(),
+              W=lasagne.init.Normal(.01),
+              b=lasagne.init.Constant(.1)
+           )
+        prevLayer = dnn.Conv2DDNNLayer(
+              prevLayer,
+              num_filters=48,
+              filter_size=(4,4),
+              stride=1,
+              pad=2,
+              nonlinearity=lasagne.nonlinearities.rectify,
+              #W=lasagne.init.HeUniform(),
+              W=lasagne.init.Normal(.01),
+              b=lasagne.init.Constant(.1)
+           )
+        l_out = lasagne.layers.DenseLayer(
+           prevLayer,
+           num_units=self.board_size*self.board_size,
            nonlinearity=lasagne.nonlinearities.softmax,
            #W=lasagne.init.HeUniform(),
            W=lasagne.init.Normal(.01),
