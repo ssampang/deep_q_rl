@@ -33,7 +33,6 @@ class NeuralAgent(object):
         self.replay_start_size = replay_start_size
         self.update_frequency = update_frequency
         self.rng = rng
-        self.phi_length = 1
 
         self.input_depth = self.network.input_depth
         self.image_width = self.network.board_size
@@ -56,15 +55,13 @@ class NeuralAgent(object):
         self.data_set = ale_data_set.DataSet(width=self.image_width,
                                              height=self.image_height,
                                              rng=rng,
-                                             max_steps=self.replay_memory_size,
-                                             phi_length=self.phi_length)
+                                             max_steps=self.replay_memory_size)
 
         # just needs to be big enough to create phi's
         self.test_data_set = ale_data_set.DataSet(width=self.image_width,
                                                   height=self.image_height,
                                                   rng=rng,
-                                                  max_steps=self.phi_length * 2,
-                                                  phi_length=self.phi_length)
+                                                  max_steps=200)
         self.epsilon = self.epsilon_start
         if self.epsilon_decay != 0:
             self.epsilon_rate = ((self.epsilon_start - self.epsilon_min) /

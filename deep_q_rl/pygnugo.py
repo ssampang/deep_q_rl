@@ -27,10 +27,6 @@ class gnugo():
         self.score_black = 0
         self.verbose = verbose
         self.board_state = np.zeros((self.board_depth,self.board_size,self.board_size),dtype=np.uint8)
-        self.board_state_2 = np.ones((self.board_size, self.board_size),
-                                      dtype=np.uint8) * 127
-        self.board_state_3 = np.ones((self.board_size, self.board_size),
-                                      dtype=np.uint8) * 127
         self.boardErrors = 0
         self.move_counter = 0
         self.white_pass = False
@@ -102,8 +98,6 @@ class gnugo():
         
             self.move_white = self.map_from_board(alpha,numa)
         
-            self.board_state_2[self.move_white[0],self.move_white[1]] = 255
-        
             self.board_state[2,self.move_white[0],self.move_white[1]] = 1. 
             self.board_state[1,self.move_white[0],self.move_white[1]] = 1. 
         else:
@@ -125,7 +119,6 @@ class gnugo():
 #        if 'illegal move' in temp:
 #            print 'Illegal Move encountered exiting'
 #            sys.exit()
-        self.board_state_2[self.move_black[0],self.move_black[0]] = 0
         self.board_state[0,self.move_black[0],self.move_black[1]] = 1. 
         self.board_state[1,self.move_black[0],self.move_black[1]] = 1. 
         
@@ -235,7 +228,6 @@ class gnugo():
         
         self.move_counter += 1
         
-        self.board_state_3 = self.getScreenGrayscale(self.board_state_3)
         
 #        view_ = View(self.board)
 #        view_.redraw()
