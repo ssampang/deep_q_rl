@@ -17,6 +17,7 @@ import lasagne
 import numpy as np
 import theano
 import theano.tensor as T
+from MaskedSoftmax import MaskedSoftmax
 from updates import deepmind_rmsprop
 
 
@@ -29,7 +30,7 @@ class DeepQLearner:
                  num_actions, discount, learning_rate, rho,
                  rms_epsilon, momentum, clip_delta, freeze_interval,
                  batch_size, network_type, update_rule,
-                 batch_accumulator, rng, input_scale=1.0):
+                 batch_accumulator, rng):
 
         self.board_size = board_size
         self.input_depth = input_depth
@@ -82,14 +83,14 @@ class DeepQLearner:
             np.zeros((batch_size, 1), dtype='int32'),
             broadcastable=(False, True))
 
-        q_vals = lasagne.layers.get_output(self.l_out, states / input_scale)
+        q_vals = lasagne.layers.get_output(self.l_out, states )
         
         if self.freeze_interval > 0:
             next_q_vals = lasagne.layers.get_output(self.next_l_out,
-                                                    next_states / input_scale)
+                                                    next_states )
         else:
             next_q_vals = lasagne.layers.get_output(self.l_out,
-                                                    next_states / input_scale)
+                                                    next_states )
             next_q_vals = theano.gradient.disconnected_grad(next_q_vals)
 
         target = (rewards +
@@ -596,7 +597,7 @@ class DeepQLearner:
         l_out = lasagne.layers.DenseLayer(
            prevLayer,
            num_units=self.board_size*self.board_size,
-           nonlinearity=lasagne.nonlinearities.softmax,
+           nonlinearity= None,
            #W=lasagne.init.HeUniform(),
            W=lasagne.init.Normal(.01),
            b=lasagne.init.Constant(.1)

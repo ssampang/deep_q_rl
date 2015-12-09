@@ -183,6 +183,7 @@ def launch(args, defaults, description):
                                          parameters.batch_accumulator,
                                          rng)
     else:
+        print 'loading network ' + parameters.nn_file
         handle = open(parameters.nn_file, 'r')
         network = cPickle.load(handle)
 
