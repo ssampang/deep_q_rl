@@ -1,0 +1,45 @@
+%!TEX root = nips2015.tex
+
+\begin{abstract}
+Our class project was to implement a DQN to play the game of Go, based on Nathan Sprague's Atari-playing agent. In this report we discuss the rules of Go and prior art in the field of Go-playing agents, and we describe our attempted implementation in terms of the techniques we tried and the problems we encountered. In the end, we were unable to get consistent results from our network due to a variety of extreme challenges inherent to this domain. We present an analysis of our results and other possible approaches that may better address the issues we encountered.
+\end{abstract}
+
+\section{The Game of Go}
+
+Go is an ancient Chinese board game composed of a grid of intersecting perpendicular lines. The rules are simple - there are two players, and each player may place one piece (or ``stone'') on the board. Stones can only be placed on the intersection between two lines on the grid, and a player may only place a stone in a space that is not occupied by another stone. One player uses black stones, the other, white.
+
+Go is widely considered to be the last largely unsolved classical game in the field of AI. This is due to two major contributing factors:
+
+\begin{enumerate}
+\item The extremely large possible number of games. A standard board has $19\times 19=381$ spaces in which to play, leading to $10^{171}$ possible board states - compare this to $10^{47}$ for chess. To consider all possible options for the next four moves would typically require examining $3.2\times 10^{11}$ possible board states.
+\item The difficulty of evaluating a board state or evaluating the effectiveness of a given play. Go is known to be an extremely subtle game, with seemingly irrelevant plays in one area of the board having cascading effects only witnessed tens of moves later or more. This makes it extremely difficult for a machine to explore the space of potential moves or evaluate the current game state, even when guided by heuristics.
+\end{enumerate}
+
+Due to these limitations, no one has as of yet been able to succesfully generate a Go agent that can compete at anything higher than a novice level. In this project, we attempted to expand upon (a) past work in the field of developing Go-playing agents and (b) recent work in developing deep-reinforcement-learning networks for playing games, in order to implement a deep-RL-based agent capable of playing Go at some level of competitiveness.
+
+\section{Prior Art}
+\label{gen_inst}
+
+\subsection{Monte Carlo Tree Search}
+Prior to the recent successes in exploring the Go problem with machine learning techniques, the best results in the field of Go agents were obtained using Monte Carlo techniques. The best and most recent example of this technique was Baudis \& Gailly's Pachi [X], an open-source Go player built on the Monte Carlo Tree Search Algorithm (MCTS).
+
+MCTS is based on an incrementally built probabilistic minimax tree. When the agent must make move, it takes the current game state as a node in the tree and expands out all possible moves this turn as child nodes. Any nodes already generated in previous iterations are included automatically. Whenever a new node is generated, it is assigned a score based on its expected value over the course of the game. This score is estimated by doing a series of Monte Carlo ``playouts,'' in which moves are chosen completely randomly or randomly with heuristics. There are a large variety of tunable parameters in this model - the number of MC playouts to compute, how and when to expand out all the children of a node explicitly, how to compute a node's score, and what heuristics (if any) to guide the MC player towards more likely or useful moves all must be chosen by the implementer.
+
+Baudis \& Gailly iterated on a large body of MCTS-based Go work by adjusting the specific heuristics used for the MCTS player to include more advanced strategies. They do not present any quantitative measure of the strength of the Pachi player, but it was one of the first to play competitively against humans with some success. A side-by-side comparison of the following projects with Pachi included in [X] shows that it is weaker than the supervised learning approaches discussed next.
+
+\subsection{Deep Convolutional Neural Net}
+There have been two major advances in developing Go agents with machine learning techniques in the past year. The first was Clark and Storkey's paper [X] which used a deep convolutional neural network (DCNN). The network was trained on two large publicly available datasets of Go games.
+
+To compile the training data, the games were broken into individual moves. The input is the board state and the output is the move chosen by the player. The authors used a set of about 16.5 million board - move pairs between the two datasets.
+
+The authors experimented with a number of board encoding techniques to attempt to explicitly inform the network about common abstractions that players of almost all levels use to make decisions about which move to play. The most basic input encoding they used had three channels - the first two to indicate the positions of stones of each player, and the third to enforce a simple rule that prevents the game from devolving into an infinite sequence of repeated plays - this rule is known as ``ko''. More advanced forms of board encodings they used explicitly captured simple features such as the the reflective properties of the game board or tactical information such as the number of ``liberties'' (neighboring empty board spaces) available to each piece on the board. They found that all of these encodings increased performance.
+
+The best network architecture they reported involved eight layers. The first seven layers were convolutional layers with filters of decreasing size, which were zero-padded out to the width of the board to prevent the size of the outputs from progressively shrinking. The last layer was a fully-connected layer with a softmax output over the entire board, which is interpreted as the network's prediction of the most likely move a human player would make.
+
+One game feature they were forced to encode directly into the DCNN was illegal moves, which ended up being a very difficult problem for us in our DQN implementation as discussed below. The basic rule of placement is simple - do not place a piece on top of another piece. However, as we discovered, teaching an agent not to do this directly from data can be extremely difficult. The authors attempted this by only backpropagating values on legal board positions during training and were able to teach the network to avoid most illegal moves, but still not all. In the end, they were forced to zero-out any output probability given to illegal moves during testing and re-normalize the remaining probability over the space of legal positions.
+
+The results reported by these authors were, at time of publication, the best so far for any approach incorporating supervised learning. They reported a test accuracy of 44\% for predicting the move picked by a human player, and had a 91\% win rate against GnuGo, a popular open-source Go player. 
+
+\subsection{DCNN / Monte Carlo Hybrid}
+
+Two very recent works, by Maddison et al. at DeepMind and by Tian \& Zhu at Facebook Research combined the described two techniques to yield the best results in the field so far [X]. They assert that one of the major weaknesses of the DCNN approach is its inability to search the space of moves, which makes it tactically weak as it cannot look ahead at the impact of future moves easily or naturally. They claim that search allows the agent to build a nonparametric local model based on the current state of the board, which has a great deal of utility alongside a global ``best-move'' model like the one provided by the DCNN implementation. Both the DeepMind and Facebook projects use MCTS to generate the search tree nodes, which are then passed to the DCNN component for evaluation. The two approaches differ in the method of synchronization - the DeepMind implementation allows the MCTS algorithm to run in parallel with the DCNN evaluation, whereas Facebook's system requires MCTS to halt until the DCNN evaluation of a node is completed. The former emphasizes high playout volume, the latter, better heuristic guidance of the rolled out nodes within MCTS. 

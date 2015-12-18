@@ -1,0 +1,10 @@
+%!TEX root = nips2015.tex
+\section{Initial Approach}
+
+\subsection{Building an Opposing Player}
+
+Our first goal was to choose an enemy agent for the DQN to play against while learning. Our initial thought was to use Clark \& Storkey's trained DCNN model as the opponent. We were able to get the weight parameters for their model, but when we ran the DCNN using their published parameters, its behavior appeared to be completely random. We were not able to configure the DCNN such that it was able to play with any kind of intelligence, and we assume that we were missing a simple parameter 
+
+\subsection{Porting the Atari Agent}
+
+We based our work on Nathan Sprague's Atari-playing code from the midterm project. Fortunately, the interface between the learner and ALE was designed to abstract away most of the details specific to any particular game, since they needed to be able to run it over all of the games in the Atari list. We were able to swap out ALE for GnuGo, the open-source Go player used for benchmarking in most of the state-of-art papers.

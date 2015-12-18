@@ -1,0 +1,10 @@
+\BOOKMARK [1][-]{section.1}{The Game of Go}{}% 1
+\BOOKMARK [1][-]{section.2}{Prior Art}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Monte Carlo Tree Search}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Deep Convolutional Neural Net}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{DCNN / Monte Carlo Hybrid}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{Initial Approach}{}% 6
+\BOOKMARK [2][-]{subsection.3.1}{Building an Opposing Player}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.2}{Porting the Atari Agent}{section.3}% 8
+\BOOKMARK [1][-]{section.4}{Network Parameters}{}% 9
+\BOOKMARK [1][-]{section.5}{Future Work}{}% 10

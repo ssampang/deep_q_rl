@@ -1,0 +1,56 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
+
+\title{Playing Go with Deep Learning}
+
+
+\author{
+Siddarth Sampangi \\
+\And
+Haresh Chudgar \\
+\AND
+Aditya Nagarajan \\
+\And
+Addison Mayberry \\
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+
+\maketitle
+
+\input{intro.tex}
+
+\input{setup.tex}
+
+\input{network.tex}
+
+\input{future.tex}
+
+\subsubsection*{References}
+
+\small{
+[2] Bouzy, B. \& Chazlot, G. (2006) Monte-Carlo Go Reinforcement Learning Experiments {\it The Book of GENESIS: Exploring
+Realistic Neural Models with the GEneral NEural SImulation System.}
+
+[1] Clark, C. \& Storkey, A. (2015) Training Deep Convolutional Neural Networks to Play Go. {\it Proceedings of the 32nd International Conference on Machine Learning - ICML '15.}
+}
+
+\end{document}
