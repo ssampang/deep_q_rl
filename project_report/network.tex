@@ -1,17 +1,13 @@
 %!TEX root = nips2015.tex
-\section{Evaluation of Network Parameters}
+\section{Evaluation and Tuning}
 
-\subsection*{Parameter Tuning and Results}
+We tested out different configurations of the experiments mentioned in the last section and evaluated them using the difference in scores of the network and GnuGo. We expected that, as the network improved its tactics, the changes would manifest in the GnuGo opponent having more difficulty scoring higher points thus increasing the difference from negative to positive.
 
-Once the DQN trainer was interfaced with GnuGo, we began adjusting the parameters to more closely mirror those of Clark \& Storkey's DCNN. In this section we discuss the network parameters we tried and the results we were able to achieve with them. To test any given set of parameters, we trained the network for ~30 games and observed the opponent's score. We focused on the opponent's score because we expected that, as the network improved its tactics, the changes would manifest in the GnuGo opponent having more difficulty scoring higher points.
+Apart from the configurations mentioned, we also attempted to integrate weight tying, which was used in the by [2] to force the network to take advantage of board symmetry by tying weights together within the convolutional layers. However, we were limited by Lasagne as it allows weight tying only between filters and not within each filter; we could not find an alternative way to implement this feature in the time allotted. This was a disappointment because intuitively this kind of understanding would help in speeding up the convergence as the network would have to learn only one eight of the filter weights. 
 
-We first reduced Sprague's default training parameters by 4x to account for the fact that, in the Atari case, the network would receive 4 frames at once from ALE, whereas with GnuGo it was receiving one board state at a time. Table \ref{} gives the various parameters we attempted to tune and the specific settings we tried.
+Another issue that proved to be challenging, as previously mentioned, was to find a way to prevent the agent from making illegal moves. The fundamental difference between the game of Go and other Atari games is the action space is dynamic. Initially the action space is square of the board size as all the places are empty, however the space keeps changing as stones are added and captured by the players. This resulted in a huge negative reward as the network consistently gave illegal moves and surprisingly did not learn from the negative reward. One of the reasons for this could be the constantly varying game state with no repetition. As discussed in the last section we dealt with this problem by adding a multiplicative layer at the output of the last dense layer which zeroed out the Q values of illegal moves.  
 
-We also attempted to integrate weight tying, which was used in the prior DCNN to force the network to take advantage of board symmetry by tying weights together within the convolutional layers. However, doing this with the tools provided by Theano / Lasagne proved very challenging. In the end, we were not able to find a straightforward way to implement this feature in the time allotted. This was a disappointment because intuitively this kind of understanding would help the agent greatly (and this intuition was borne out in Clark \& Storkey's work, which found that incorporating symmetry did increase performance.)
-
-Another issue that proved to be surprisingly challenging, as previously mentioned, was to find a way to prevent the agent from making illegal moves. \textcolor{red}{AM: didn't have time to add the board errors discussion and graph yet.}
-
-Unfortunately, in all cases we were unable to get consistent performance, regardless of specific parameter settings. Figure \ref{fig:score} shows one particular training session that we allowed to run for several hundred epochs. 
+Unfortunately, in all cases we were unable to get consistent performance, regardless of specific parameter settings. It did win occasionally, but overall GnuGo beat the network consistently. In the games which it won, we could not make out a clear strategy so we assume its a one off game. Figure \ref{fig:score} shows one particular training session that we allowed to run for 2000 games. 
 
 \begin{figure}[h!]
 \centering
