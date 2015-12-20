@@ -26,10 +26,14 @@ iii. Five layer CNN with one dense layer
 \\
 iV. Seven layer CNN with one dense layer
 \\
-v. Five layer CNN with one dense layer and one multiplicative layer which zeroes out the q values of illegal moves
-\\
 In addition, we varied the filter sizes of the convolution layers.
 \subsection{Parameters of Q Learning}
 We also varied the experience replay size and discount factor to find the right range of values. 
 \\
 Each experiment was performed with the hope that our main issue was simply that of finding the right network that can approximate our Q-function. However, as we will discuss later, we believe there are more fundamental issues with our approach that prevent deep reinforcement learning from successfully tackling Go without other meaningful improvements.
+
+\subsection{Weight tying}
+Apart from the configurations mentioned, we also attempted to integrate weight tying, which was used in the by [2] to force the network to take advantage of board symmetry by tying weights together within the convolutional layers. However, we were limited by Lasagne as it allows weight tying only between filters and not within each filter; we could not find an alternative way to implement this feature in the time allotted. This was a disappointment because intuitively this kind of understanding would help in speeding up the convergence as the network would have to learn only one eighth of the filter weights. 
+
+\subsection{Illegal Moves}
+Another issue that proved to be challenging, as previously mentioned, was to find a way to prevent the agent from making illegal moves. The fundamental difference between the game of Go and Atari games is the action space is dynamic. Initially the action space is square of the board size as all the places are empty, however the space keeps changing as positions get filled or freed as stones are added or captured by the players. This resulted in a huge negative reward as the network consistently gave illegal moves and surprisingly did not learn from the negative reward. One of the reasons for this could be the constantly varying game state with no repetition. We dealt with this problem by adding a multiplicative layer at the output of the last dense layer which zeroed out the Q values of illegal moves.  

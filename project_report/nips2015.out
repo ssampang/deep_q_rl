@@ -9,5 +9,7 @@
 \BOOKMARK [2][-]{subsection.5.1}{Input representation of the game}{section.5}% 9
 \BOOKMARK [2][-]{subsection.5.2}{Architecture of the convolution neural network}{section.5}% 10
 \BOOKMARK [2][-]{subsection.5.3}{Parameters of Q Learning}{section.5}% 11
-\BOOKMARK [1][-]{section.6}{Evaluation and Tuning}{}% 12
-\BOOKMARK [1][-]{section.7}{Analysis and Future Work}{}% 13
+\BOOKMARK [2][-]{subsection.5.4}{Weight tying}{section.5}% 12
+\BOOKMARK [2][-]{subsection.5.5}{Illegal Moves}{section.5}% 13
+\BOOKMARK [1][-]{section.6}{Results}{}% 14
+\BOOKMARK [1][-]{section.7}{Analysis and Future Work}{}% 15
