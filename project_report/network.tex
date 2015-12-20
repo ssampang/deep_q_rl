@@ -3,7 +3,7 @@
 
 \subsection*{Parameter Tuning and Results}
 
-Once the DQN trainer was connected to GnuGo and working, we began adjusting the parameters to more closely mirror those of Clark \& Storkey's DCNN. In this section we discuss the network parameters we tried and the results we were able to achieve with them. To test any given set of parameters, we trained the network for ~30 games and observed the opponent's score. We focused on the opponent's score because we expected that, as the network improved its tactics, the changes would manifest in the GnuGo opponent having more difficulty scoring higher points.
+Once the DQN trainer was interfaced with GnuGo, we began adjusting the parameters to more closely mirror those of Clark \& Storkey's DCNN. In this section we discuss the network parameters we tried and the results we were able to achieve with them. To test any given set of parameters, we trained the network for ~30 games and observed the opponent's score. We focused on the opponent's score because we expected that, as the network improved its tactics, the changes would manifest in the GnuGo opponent having more difficulty scoring higher points.
 
 We first reduced Sprague's default training parameters by 4x to account for the fact that, in the Atari case, the network would receive 4 frames at once from ALE, whereas with GnuGo it was receiving one board state at a time. Table \ref{} gives the various parameters we attempted to tune and the specific settings we tried.
 
