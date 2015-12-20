@@ -3,7 +3,16 @@
 \section{Deep Q Learning for solving Go}
 In this section, we detail our initial motivation behind using deep Q learning (specifically, DeepMind's approach) to solve Go. As detailed in the previous section, Go has traditionally been solved using Monte Carlo approaches which search through the complete future state space of the game. However, this is time consuming considering the size of the game's state space, and so various approximate techniques have to be used to cull the search space. This requirement is the main drawback of Monte Carlo approaches. 
 \\
-Human experts use an approach that can be better likened to pattern recognition. Professional players analyze positions using a large vocabulary of shapes, such as joseki (corner patterns) and tesuji (tactical patterns). If we regard the game state as an image (each position is a pixel), then a Convolutional Neural Network is better suited to identifying these patterns and abstract shapes. This is likely the reason behind the success of applying convolutional neural networks to Go. However a CNN lacks the concept of time, and can only decide on the next move. Thus, it fares badly against a Monte Carlo approach, which can plan multiple moves ahead - a key necessity in strategy based games.
+Human experts use an approach that can be better likened to pattern recognition. Professional players analyze positions using a large vocabulary of shapes, such as joseki (corner patterns) and tesuji (tactical patterns). The most simple example is that of an atari which is shown in \textcolor{red}{Figure } to illustrate the idea. If we regard the game state as an image (each position is a pixel), then a Convolutional Neural Network is better suited to identifying these patterns and abstract shapes. This is likely the reason behind the success of applying convolutional neural networks to Go. However a CNN lacks the concept of time, and can only decide on the next move. Thus, it fares badly against a Monte Carlo approach, which can plan multiple moves ahead - a key necessity in strategy based games.
+\\
+\begin{figure}[h]
+	\centering
+	\subfloat[Example 1: The white stones are all in atari and can be captured if black plays the next move]{\includegraphics[width=0.47\textwidth]{atari_1}\label{fig:Gamma_0.7}}
+	\hfill
+	\subfloat[Example 2:The five black stones on the top right are in atari. The only liberty they have is the circled intersection.
+	The group of two black stones on the lower left is also in atari. It may be captured by white (when white plays at a).]{\includegraphics[width=0.43\textwidth]{atari_2}\label{fig:Karpathy}}
+	\caption{Concept of Atari}
+\end{figure}
 \\
 
 \subsection{Reinforcement Learning}
