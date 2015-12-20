@@ -1,2 +1,5 @@
 %!TEX root = nips2015.tex
-\section{Future Work}
+\section{Analysis and Future Work}
+In this section, we offer hypotheses that attempt to explain why our agent was not able to learn an appropriate Q-network for Go. First, we simply could not generate a sufficient number of quality training examples. By "quality", we refer to the fact that our network would generate a large number of illegal moves, and each one would be added to the data set as a training example with a reward of -1 in the hopes that it would allow our network to intrinsically learn to avoid illegal moves. However, this led to a disproportionately large number of illegal move examples being added to our training set, which meant that a large number of training examples did not involve any notion of strategy in the game. Concretely, we would sometimes see illegal moves account for upwards of 50\% of the (state,action,reward) sequences added from each game.
+
+Even if we disregard this, the speed with which we were able to generate training examples was simply far from sufficient. If 16 
