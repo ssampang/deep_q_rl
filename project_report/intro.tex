@@ -20,14 +20,14 @@ Due to these limitations, no one has as of yet been able to successfully generat
 \section{Prior Art}
 \label{gen_inst}
 
-\subsection*{Monte Carlo Tree Search}
+\subsection{Monte Carlo Tree Search}
 Prior to the recent successes in exploring the Go problem with machine learning techniques, the best results in the field of Go agents were obtained using Monte Carlo techniques. The best and most recent example of this technique was Baudis \& Gailly's Pachi [1], an open-source Go player built on the Monte Carlo Tree Search Algorithm (MCTS).
 
 MCTS is based on an incrementally built probabilistic minimax tree. When the agent must make a move, it takes the current game state as a node in the tree and expands all possible moves of this turn as child nodes. Any nodes already generated in previous iterations are included automatically. Whenever a new node is generated, it is assigned a score based on its expected value over the course of the game. This score is estimated by doing a series of Monte Carlo ``playouts,'' in which moves are chosen completely randomly or randomly with heuristics. There are a large variety of tunable parameters in this model including the number of MC playouts to compute, how and when to expand out all the children of a node explicitly, how to compute a node's score, and what heuristics (if any) to guide the MC player towards more likely or useful moves.
 
 Baudis \& Gailly iterated on a large body of MCTS-based Go work by adjusting the specific heuristics used for the MCTS player to include more advanced strategies. They do not present any quantitative measure of the strength of the Pachi player, but it was one of the first to play competitively against humans with some success. A side-by-side comparison of the following projects with Pachi included in [4] shows that it is weaker than the supervised learning approaches discussed next.
 
-\subsection*{Deep Convolutional Neural Net}
+\subsection{Deep Convolutional Neural Net}
 There have been two major advances in developing Go agents with machine learning techniques in the past year. The first was Clark and Storkey's paper [2] which used a deep convolutional neural network (DCNN). The network was trained on two large publicly available datasets of Go games.
 
 To compile the training data, the games were broken into individual moves. The input is the board state and the output is the move chosen by the player. The authors used a set of about 16.5 million board - move pairs between the two datasets.
@@ -38,6 +38,6 @@ The best network architecture they reported involved eight layers. The first sev
 
 The results reported by these authors were, at time of publication, the best so far for any approach incorporating supervised learning. They reported a test accuracy of 44\% for predicting the move picked by a human player, and had a 91\% win rate against GnuGo, a popular open-source Go player. 
 
-\subsection*{DCNN / Monte Carlo Hybrid}
+\subsection{DCNN / Monte Carlo Hybrid}
 
 Two very recent works, by Maddison et al. at DeepMind and by Tian \& Zhu at Facebook Research combined the described two techniques to yield the best results in the field so far [3,4]. They assert that one of the major weaknesses of the DCNN approach is its inability to search the space of moves, which makes it tactically weak as it cannot look ahead at the impact of future moves easily or naturally. They claim that search allows the agent to build a non-parametric local model based on the current state of the board, which has a great deal of utility alongside a global ``best-move'' model like the one provided by the DCNN implementation. Both the DeepMind and Facebook projects use MCTS to generate the search tree nodes, which are then passed to the DCNN component for evaluation. The two approaches differ in the method of synchronization - the DeepMind implementation allows the MCTS algorithm to run in parallel with the DCNN evaluation, whereas Facebook's system requires MCTS to halt until the DCNN evaluation of a node is completed. The former emphasizes high playout volume, the latter, better heuristic guidance of the rolled out nodes within MCTS. 

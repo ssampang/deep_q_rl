@@ -1,22 +1,13 @@
 %!TEX root = nips2015.tex
-\section{Initial Setup}
-
-\subsection*{Building an Opposing Player}
-
+\section{Building an Opposing Player}
 Our first goal was to choose an enemy agent for the DQN to play against while learning. We evaluated three different enemies.
-
-1. Clark \& Storkey's trained DCNN model: \\
-Clark \& Storkey used ConnetJS to build their network. To use their network, we had to convert parse their network file and import it to lasagne. We found that the converted network was not playing as well as the online version posted by the authors. This is probably because ConvnetJS and Lasagne represent weights differently. Not to lose more time, we moved to evaluating other approaches.
-\\
-
-2. Pachi/Michi: \\
-We next turned to Pachi, Baudis \& Gailly's MCTS-based player. While playing against it, we realized the speed  We were able to get it working, but it was very slow to compute the next move, taking almost a second or two. This would have been far too slow to be useful for the purpose of running hundreds of training epochs for the DQN.\\
-
-3. GnuGo:\\
+\subsection{Clark \& Storkey's trained DCNN model}
+Clark \& Storkey used ConvnetJS to build their network. To use their network, we had to parse their network file and import it to lasagne. We found that the converted network was not playing as well as the online version posted by the authors. This is probably because ConvnetJS and Lasagne represent weights differently. We couldnt afford to spend more time on the issue, and so we moved on to evaluating other approaches.
+\subsection{Pachi/Michi}
+We next turned to Pachi, Baudis \& Gailly's MCTS-based player. While playing against it, we realized that it was slow in generating moves (each move took 1-2 seconds). This would be far too slow for the purpose of generating training examples for DQN.
+\subsection{GnuGo}
 We finally settled on GnuGo, a standard open-source heuristic-based Go player. This program is the baseline for comparison in most of the recent papers on Go, so we considered it to be a good choice for training our agent. GnuGo has a scale of difficulty levels it will play at, from 1 to 10, with 10 being the most advanced. There is a tradeoff, however, as more advanced levels also take significantly more time to decide on a move. We left it at the default setting of 10 in order to push our agent towards better play from the beginning.
-
 \subsection*{Porting the Atari Agent}
-
 We based our work on Nathan Sprague's Atari-playing code from the midterm project. Fortunately, the interface between the learner and ALE was designed to abstract away most of the details specific to any particular Atari game, since they needed to be able to run it over all of the games in the list. We were able to swap out ALE for GnuGo by doing a few minor modifications to the training code and creating a simple interface from GnuGo to the DQN trainer. This allowed the training code to request score and game state from GnuGo the same as it did with ALE.
 
 Another important change we had to make was the input representation. We wanted to try out different representations of the go game and evaluate each one of them. This part was a bit tricky as the input representation is tied with almost every class in the code.
