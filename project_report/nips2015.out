@@ -9,5 +9,5 @@
 \BOOKMARK [2][-]{subsection.5.1}{Input representation of the game}{section.5}% 9
 \BOOKMARK [2][-]{subsection.5.2}{Architecture of the convolution neural network}{section.5}% 10
 \BOOKMARK [2][-]{subsection.5.3}{Parameters of Q Learning}{section.5}% 11
-\BOOKMARK [1][-]{section.6}{Evaluation of Network Parameters}{}% 12
+\BOOKMARK [1][-]{section.6}{Evaluation and Tuning}{}% 12
 \BOOKMARK [1][-]{section.7}{Future Work}{}% 13
