@@ -1,7 +1,7 @@
 # Introduction 
 
 This package modifies the popular [deep_q_rl](https://github.com/spragunr/deep_q_rl) implementation of the deep
-Q-learning algorithm described in [1] and [2] to play the game of Go. Our main work involved setting up [GNU Go](https://www.gnu.org/software/gnugo/) as an opponent, and implementing techniques from [3]. For more details, see our [report](https://github.com/ssampang/deep_q_rl/blob/master/Playing%20Go%20with%20Deep%20Learning.pdf).
+Q-learning algorithm described in [1] and [2] to train an agent on the game of Go. Our main work involved setting up [GNU Go](https://www.gnu.org/software/gnugo/) as an opponent, and implementing game-specific techniques from [3]. While our results were unfavorable, we publish this repository as a starting point for further work. For more details, see our [report](https://github.com/ssampang/deep_q_rl/blob/master/Playing%20Go%20with%20Deep%20Learning.pdf).
 
 # Dependencies
 
